@@ -1,5 +1,7 @@
 ﻿# Redenção
 
+Jogue agora em https://redencao.onrender.com
+
 Jogo de investigação narrativo, jogado no navegador, com estética noir — sem preto e branco, mas em preto, cinza, branco e tonalidades de azul.
 
 A história é uma adaptação do código em Portugol disponível em `codigo.txt`. O jogo está jogável do prólogo ao combate final, com exploração, pistas, carta aleatória e dois finais.
