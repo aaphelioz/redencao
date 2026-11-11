@@ -4,9 +4,14 @@
    Reaproveita story.js (textos/puzzles) e a API Node (moedas, armas, conquistas).
    O menu/opções/loja/conquistas continuam em DOM; o mundo roda em Phaser 3. */
 window.RedencaoWorld = (() => {
-  const story = window.REDENCAO_STORY;
+  const REDENCAO_STORY = window.REDENCAO_STORY;
+  const ARQUIVO047_STORY = window.ARQUIVO047_STORY;
+  let story = REDENCAO_STORY;
   const R = window.RedencaoRooms;
   const api = window.RedencaoAPI;
+
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V'];
+  const isArquivo047 = () => Boolean(state && state.campaign === 'arquivo047');
 
   const LETTER_STORAGE_KEY = 'redencao:letter-room';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -23,6 +28,10 @@ window.RedencaoWorld = (() => {
       over: false,
       gameMode: 'standard',
       originalMode: 'standard',
+      campaign: 'redencao',
+      chapter: 1,
+      completedChapters: {},
+      skipIntro: false,
       scene: 'intro',
       currentRoom: 'sala',
       examined: new Set(),
@@ -52,12 +61,17 @@ window.RedencaoWorld = (() => {
   }
 
   function getModeLabel() {
+    if (isArquivo047()) return 'ARQUIVO 047';
     return state.gameMode === 'no-mercy' ? 'NO MERCY' : 'STANDARD';
   }
 
   function getRoomInteractions(roomId) {
     const room = story.rooms[roomId];
     if (!room) return [];
+    if (isArquivo047()) {
+      // Campanha paralela: interações com chapter <= capítulo atual
+      return room.interactions.filter((i) => (i.chapter || 1) <= state.chapter);
+    }
     if (state.gameMode !== 'no-mercy' || !story.noMercyInteractions) return room.interactions;
     const selectedIds = [...(story.noMercyInteractions[roomId] || [])];
     const letterHost = state.letterHost;
@@ -105,6 +119,8 @@ window.RedencaoWorld = (() => {
   const gameSection = document.getElementById('game');
   const menu = document.getElementById('main-menu');
   const progressLabel = document.getElementById('game-progress');
+  const chapterEl = document.getElementById('game-chapter');
+  const chapterTintEl = document.getElementById('chapter-tint');
   const menuButton = document.querySelector('[data-game-menu]');
   const dialogEl = document.getElementById('dialog');
   const dialogEyebrow = document.getElementById('dialog-eyebrow');
@@ -124,8 +140,97 @@ window.RedencaoWorld = (() => {
     return node;
   }
 
+  // ---------- ARQUIVO 047: progressão e rótulos ----------
+  function getChapterRequirements(chapterN) {
+    const reqs = story.chapterRequirements || {};
+    return reqs[chapterN] || [];
+  }
+
+  function getChapterProgress() {
+    const req = getChapterRequirements(state.chapter);
+    const examined = req.filter((id) => state.examined.has(id)).length;
+    const completedCount = Math.min(5, Object.values(state.completedChapters || {}).filter(Boolean).length);
+    return { total: req.length, examined, completedCount };
+  }
+
+  function setArquivo047Labels() {
+    if (!isArquivo047()) return;
+    if (chapterEl) {
+      const chapterDef = (story.chapters || [])[state.chapter - 1];
+      const name = chapterDef ? chapterDef.name : '';
+      chapterEl.textContent = `ARQUIVO 047 — Capítulo ${ROMAN[state.chapter - 1]} · ${name}`;
+    }
+  }
+
+  function applyChapterTint(n) {
+    document.body.classList.add('is-arquivo047');
+    for (let i = 1; i <= 5; i += 1) {
+      document.body.classList.toggle(`chapter-${i}`, i === n);
+    }
+    if (chapterTintEl) chapterTintEl.hidden = false;
+  }
+
+  function clearChapterTint() {
+    document.body.classList.remove('is-arquivo047');
+    for (let i = 1; i <= 5; i += 1) {
+      document.body.classList.remove(`chapter-${i}`);
+    }
+    if (chapterTintEl) chapterTintEl.hidden = true;
+  }
+
+  async function persistArquivo047() {
+    if (!isArquivo047()) return;
+    try {
+      await api.saveArquivo047Progress({
+        chapter: state.chapter,
+        examined: [...state.examined],
+        flags: state.flags,
+        completed: state.completedChapters,
+        currentRoom: state.currentRoom,
+      });
+    } catch (e) {
+      console.error('ARQUIVO 047: falha ao salvar progresso', e);
+    }
+  }
+
+  function maybeCompleteChapter() {
+    if (!isArquivo047()) return false;
+    const req = getChapterRequirements(state.chapter);
+    if (!req.length) return false;
+    if (!req.every((id) => state.examined.has(id))) return false;
+
+    const finished = state.chapter;
+    state.completedChapters[finished] = true;
+    const isLast = finished >= 5;
+    if (!isLast) {
+      state.chapter += 1;
+      applyChapterTint(state.chapter);
+    }
+    const completion = (story.chapterCompletions && story.chapterCompletions[finished]) || null;
+    if (completion) {
+      sfx('unlock');
+      openDialog({
+        eyebrow: completion.eyebrow,
+        title: completion.title,
+        paragraphs: completion.paragraphs,
+        actions: [{ label: 'Continuar', variant: 'primary' }],
+      });
+    }
+    setArquivo047Labels();
+    updateProgress();
+    persistArquivo047();
+    return true;
+  }
+
   function updateProgress() {
     if (!progressLabel || !state) return;
+    if (isArquivo047()) {
+      const { total, examined, completedCount } = getChapterProgress();
+      const parts = [`Cap. ${ROMAN[state.chapter - 1]} · Pistas ${examined} / ${total}`, `Capítulos ${completedCount} / 5`];
+      progressLabel.textContent = parts.join(' · ');
+      setArquivo047Labels();
+      return;
+    }
     const parts = [`Pistas ${state.examined.size} / ${getTotalInteractions()}`];
     if (state.flags.letterFound) parts.push('Carta encontrada');
     progressLabel.textContent = parts.join(' · ');
@@ -304,6 +409,40 @@ window.RedencaoWorld = (() => {
     story.letter.paragraphs.forEach((p) => body.append(el('p', '', p)));
     letter.append(body);
     return letter;
+  }
+
+  // ===== ARQUIVO 047 — diálogos com Helena (NPC) =====
+  function openNpcDialog() {
+    if (!isArquivo047()) return;
+    const dialogDef = story.npcDialogs && story.npcDialogs[state.chapter];
+    if (!dialogDef) return; // capítulo 5: a casa em silêncio
+    const actions = [{ label: 'Voltar', variant: 'ghost' }];
+    if (dialogDef.question) {
+      actions.unshift({
+        label: dialogDef.question.label,
+        variant: 'primary',
+        onClick() {
+          openNpcDialogResponse(dialogDef.question);
+        },
+      });
+    }
+    openDialog({
+      eyebrow: 'Helena',
+      title: 'Helena',
+      subtitle: dialogDef.subtitle || 'A esposa',
+      paragraphs: dialogDef.text,
+      actions,
+    });
+  }
+
+  function openNpcDialogResponse(question) {
+    openDialog({
+      eyebrow: 'Helena',
+      title: 'Helena',
+      subtitle: question.subtitle || 'Ela não desvia os olhos',
+      paragraphs: question.answer,
+      actions: [{ label: 'Voltar', variant: 'ghost' }],
+    });
   }
 
   // ---------- easter egg: O Arquivo Kennedy ----------
@@ -714,6 +853,7 @@ window.RedencaoWorld = (() => {
 
   // ---------- pistas / encontros ----------
   function maybeQueueEncounter() {
+    if (isArquivo047()) return; // campanha de investigação — sem emboscadas
     const cfg = getModeConfig();
     if (cfg.explorationEncounters <= 0) return;
     if (state.encountersDone >= cfg.explorationEncounters) return;
@@ -726,6 +866,10 @@ window.RedencaoWorld = (() => {
   }
 
   function afterInteractionCloses() {
+    if (isArquivo047()) {
+      maybeCompleteChapter();
+      return;
+    }
     if (state.pendingEncounter && !state.over) {
       goToCombat('exploration');
     }
@@ -759,6 +903,7 @@ window.RedencaoWorld = (() => {
     const wasExamined = state.examined.has(interaction.id);
     state.examined.add(interaction.id);
     if (interaction.effect) state.flags[interaction.effect] = true;
+    persistArquivo047();
 
     const isLetterHost = interaction.id === state.letterHost;
     if (isLetterHost && !state.flags.letterFound) state.flags.letterFound = true;
@@ -836,6 +981,7 @@ window.RedencaoWorld = (() => {
       if (input.value.trim().toLowerCase() === 'helena') {
         state.flags.safeOpen = true;
         state.examined.add('sala-cofre');
+        persistArquivo047();
         maybeQueueEncounter();
         updateProgress();
         sfx('unlock');
@@ -884,6 +1030,118 @@ window.RedencaoWorld = (() => {
         { label: 'Voltar ao jardim', variant: 'ghost' },
       ],
     });
+  }
+
+  // ===== ARQUIVO 047 — o poço e a última correspondência =====
+  function openArquivo047Well() {
+    const paragraphs = [...story.well.text];
+    openDialog({
+      eyebrow: 'Jardim — a última porta',
+      title: 'O poço',
+      paragraphs,
+      clue: story.well.clue,
+      actions: [
+        {
+          label: 'Descer com a lanterna',
+          hint: 'Algo prende na pedra',
+          variant: 'danger',
+          onClick() {
+            closeDialog();
+            window.setTimeout(openArquivo047FinalLetter, 150);
+          },
+        },
+        { label: 'Voltar ao jardim', variant: 'ghost' },
+      ],
+    });
+  }
+
+  function buildFinalLetter() {
+    const fl = story.finalLetter;
+    const letter = el('section', 'letter letter--final');
+    letter.append(el('p', 'letter__kicker', fl.kicker));
+    letter.append(el('h3', 'letter__title', fl.title));
+    const body = el('div', 'letter__body');
+    fl.body.forEach((p) => body.append(el('p', '', p)));
+    letter.append(body);
+    return letter;
+  }
+
+  function openArquivo047FinalLetter() {
+    state.examined.add('jardim-well');
+    state.flags.finalLetter = true;
+    persistArquivo047();
+    updateProgress();
+
+    const fl = story.finalLetter;
+    openDialog({
+      eyebrow: 'Correspondência sob a pedra',
+      title: fl.title,
+      paragraphs: fl.intro,
+      content: buildFinalLetter(),
+      actions: [{
+        label: 'Guardar a carta no bolso',
+        hint: 'A campanha se encerra',
+        variant: 'primary',
+        onClick() {
+          closeDialog();
+          window.setTimeout(() => {
+            openDialog({
+              eyebrow: 'ARQUIVO 047 — O bolso do coração',
+              title: 'De volta à varanda',
+              paragraphs: fl.outro,
+              actions: [{ label: 'Encerrar o Arquivo 047', variant: 'primary', onClick() { closeDialog(); window.setTimeout(renderArquivo047Ending, 200); } }],
+            });
+          }, 180);
+        },
+      }],
+    });
+  }
+
+  async function renderArquivo047Ending() {
+    state.over = true;
+    state.completedChapters[5] = true;
+    try {
+      await api.saveArquivo047Progress({
+        chapter: 5,
+        examined: [...state.examined],
+        flags: state.flags,
+        completed: state.completedChapters,
+        done: true,
+        currentRoom: state.currentRoom,
+      });
+    } catch (e) {
+      console.error('ARQUIVO 047: falha ao registrar a conclusão', e);
+    }
+    try {
+      await api.unlockAchievement('arquivo_047');
+    } catch (e) {
+      console.error('ARQUIVO 047: falha ao desbloquear conquista', e);
+    }
+
+    clearChapterTint();
+    if (!endingEl) return;
+    combatDock.hidden = true;
+
+    const e = story.ending047;
+    const card = el('article', 'scene scene--victory scene--arquivo047');
+    card.append(el('p', 'scene__eyebrow', e.eyebrow));
+    const h = el('h2', 'scene__title', e.title);
+    h.tabIndex = -1;
+    card.append(h);
+    const text = el('div', 'scene__text');
+    e.paragraphs.forEach((p) => text.append(el('p', '', p)));
+    card.append(text);
+
+    const actions = el('div', 'scene__actions');
+    const menuBtn = el('button', 'btn btn--primary scene__button');
+    menuBtn.append(el('span', 'scene__button-label', 'Voltar ao menu'));
+    menuBtn.addEventListener('click', () => { sfx('ui'); returnToMenu(); });
+    actions.append(menuBtn);
+    card.append(actions);
+
+    endingEl.replaceChildren(card);
+    endingEl.hidden = false;
+    window.requestAnimationFrame(() => h.focus({ preventScroll: true }));
   }
 
   function openHelenaIntro() {
@@ -1083,8 +1341,11 @@ window.RedencaoWorld = (() => {
     if (endingEl) { endingEl.hidden = true; endingEl.replaceChildren(); }
     if (combatDock) combatDock.hidden = true;
     showWorldPrompt(null);
+    clearChapterTint();
     gameSection.hidden = true;
     document.body.classList.remove('is-playing');
+    story = REDENCAO_STORY;
+    state = null;
     if (menu) {
       menu.hidden = false;
       const playButton = menu.querySelector('[data-action="play"]');
@@ -1096,6 +1357,8 @@ window.RedencaoWorld = (() => {
   }
 
   async function start(mode = 'standard') {
+    story = REDENCAO_STORY;
+    clearChapterTint();
     state = createState();
     state.active = true;
     state.gameMode = mode;
@@ -1105,6 +1368,7 @@ window.RedencaoWorld = (() => {
     state.scene = 'intro';
     state.runHp = getModeConfig().playerMaxHp;
     gameStartTime = Date.now();
+    if (chapterEl) chapterEl.textContent = story.chapter;
 
     showGame();
     if (endingEl) { endingEl.hidden = true; endingEl.replaceChildren(); }
@@ -1127,6 +1391,52 @@ window.RedencaoWorld = (() => {
       try { await api.ensureStarterKit(); } catch { /* sem servidor */ }
     }
 
+    bootPhaser();
+  }
+
+  // ===== ARQUIVO 047 — entrada da campanha paralela =====
+  async function startArquivo047() {
+    story = ARQUIVO047_STORY;
+    state = createState();
+    state.campaign = 'arquivo047';
+    state.gameMode = 'standard';
+    state.originalMode = 'standard';
+    state.scene = 'intro';
+    state.runHp = getModeConfig().playerMaxHp;
+    gameStartTime = Date.now();
+    state.letterRoom = null;
+    state.letterHost = null;
+
+    showGame();
+    if (endingEl) { endingEl.hidden = true; endingEl.replaceChildren(); }
+    if (combatDock) combatDock.hidden = true;
+    if (chapterEl) chapterEl.textContent = `ARQUIVO 047 — Capítulo I · ${(ARQUIVO047_STORY.chapters[0] || {}).name || ''}`;
+    applyChapterTint(1);
+
+    // Retoma de onde parou — o progresso nunca toca na campanha principal
+    let saved = null;
+    try { saved = await api.getArquivo047Progress(); } catch (e) { console.error('ARQUIVO 047: falha ao carregar progresso', e); }
+    if (saved && saved.done) {
+      try { await api.resetArquivo047Progress(); } catch (e) { console.error('ARQUIVO 047: falha ao recomeçar', e); }
+      saved = null;
+    }
+    const hasProgress = saved && (
+      (Array.isArray(saved.examined) && saved.examined.length > 0)
+      || (saved.chapter && saved.chapter > 1)
+      || (saved.completed && Object.keys(saved.completed).length > 0)
+    );
+    if (hasProgress) {
+      state.skipIntro = true;
+      state.chapter = Math.min(5, Math.max(1, Number(saved.chapter) || 1));
+      state.examined = new Set(saved.examined || []);
+      state.flags = { ...state.flags, ...(saved.flags || {}) };
+      state.completedChapters = saved.completed || {};
+      state.currentRoom = saved.currentRoom || 'sala';
+      state.scene = 'room';
+      applyChapterTint(state.chapter);
+    }
+
+    updateProgress();
     bootPhaser();
   }
 
@@ -1184,7 +1494,7 @@ window.RedencaoWorld = (() => {
     }
   });
 
-  window.RedencaoGame = { start, returnToMenu };
+  window.RedencaoGame = { start, startArquivo047, returnToMenu };
 
   // API interna para combat.js
   return {
@@ -1203,9 +1513,11 @@ window.RedencaoWorld = (() => {
     finishEncounterVictory,
     openInteractionFlow,
     openWellFlow,
+    openNpcDialog,
+    openArquivo047Well,
     goToCombat,
     sfx,
     reducedMotion,
-    story,
+    get story() { return story; },
   };
 })();

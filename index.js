@@ -134,6 +134,35 @@ function handleApiRequest(request, response, pathname) {
     return true;
   }
 
+  // GET /api/arquivo047 - progresso da campanha paralela
+  if (pathname === '/api/arquivo047' && method === 'GET') {
+    sendJson(response, DB.getArquivo047());
+    return true;
+  }
+
+  // POST /api/arquivo047 - mescla progresso da campanha paralela
+  if (pathname === '/api/arquivo047' && method === 'POST') {
+    let body = '';
+    request.on('data', chunk => body += chunk);
+    request.on('end', () => {
+      try {
+        const partial = JSON.parse(body || '{}');
+        const progress = DB.saveArquivo047(partial);
+        sendJson(response, { success: true, progress });
+      } catch (e) {
+        sendJson(response, { success: false, error: 'Invalid data' }, 400);
+      }
+    });
+    return true;
+  }
+
+  // POST /api/arquivo047/reset - apagar progresso da campanha paralela
+  if (pathname === '/api/arquivo047/reset' && method === 'POST') {
+    const progress = DB.resetArquivo047();
+    sendJson(response, { success: true, progress });
+    return true;
+  }
+
   // POST /api/save/:slot
   if (pathname.match(/^\/api\/save\/(\d+)$/) && method === 'POST') {
     let body = '';

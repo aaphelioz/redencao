@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" shape-rendering="crispEdges" role="img" aria-label="A Mansão Albrecht vista do jardim ao entardecer: roseiras mortas, o banco de madeira e uma única janela acesa no andar de cima.">
+  <!-- céu em faixas -->
+  <rect width="320" height="200" fill="#03060b"/>
+  <rect y="22" width="320" height="34" fill="#050d16"/>
+  <rect y="56" width="320" height="34" fill="#07131f"/>
+  <rect y="90" width="320" height="34" fill="#081926"/>
+  <rect y="124" width="320" height="30" fill="#091d2b"/>
+
+  <!-- estrelas -->
+  <g fill="#7fa8c9" opacity="0.6">
+    <rect x="16" y="12" width="1" height="1"/><rect x="34" y="26" width="1" height="1"/>
+    <rect x="52" y="8" width="1" height="1"/><rect x="78" y="20" width="1" height="1"/>
+    <rect x="96" y="34" width="1" height="1"/><rect x="112" y="10" width="1" height="1"/>
+    <rect x="140" y="22" width="1" height="1"/><rect x="160" y="14" width="1" height="1"/>
+    <rect x="188" y="30" width="1" height="1"/><rect x="206" y="8" width="1" height="1"/>
+    <rect x="226" y="38" width="1" height="1"/><rect x="240" y="18" width="1" height="1"/>
+    <rect x="300" y="28" width="1" height="1"/><rect x="60" y="44" width="1" height="1"/>
+    <rect x="128" y="40" width="1" height="1"/><rect x="262" y="12" width="1" height="1"/>
+  </g>
+
+  <!-- lua baixa, meio engolida pela nuvem -->
+  <g>
+    <rect x="252" y="12" width="22" height="4" fill="#d9d4c6"/>
+    <rect x="248" y="16" width="30" height="10" fill="#d9d4c6"/>
+    <rect x="250" y="26" width="26" height="6" fill="#c8c3b4"/>
+    <rect x="254" y="32" width="16" height="3" fill="#b0ab9c"/>
+    <rect x="248" y="18" width="6" height="4" fill="#b9b4a6"/>
+    <rect x="262" y="24" width="5" height="5" fill="#c8c3b4"/>
+    <rect x="238" y="20" width="52" height="3" fill="#04080d" opacity="0.85"/>
+    <rect x="244" y="27" width="34" height="2" fill="#04080d" opacity="0.7"/>
+  </g>
+
+  <!-- linha de árvores ao fundo -->
+  <g fill="#060c13">
+    <rect x="0" y="118" width="34" height="22"/>
+    <rect x="30" y="108" width="22" height="32"/>
+    <rect x="48" y="122" width="30" height="18"/>
+    <rect x="212" y="120" width="28" height="20"/>
+    <rect x="236" y="110" width="24" height="30"/>
+    <rect x="258" y="124" width="62" height="16"/>
+  </g>
+
+  <!-- chão do jardim -->
+  <rect y="140" width="320" height="60" fill="#070b08"/>
+  <rect y="140" width="320" height="4" fill="#0a1009"/>
+
+  <!-- mansão -->
+  <g>
+    <!-- corpo principal -->
+    <rect x="104" y="76" width="112" height="66" fill="#131a24"/>
+    <rect x="104" y="76" width="112" height="4" fill="#171f2b"/>
+    <!-- andar superior -->
+    <rect x="116" y="52" width="88" height="26" fill="#10151d"/>
+    <!-- cornijas -->
+    <rect x="100" y="46" width="120" height="7" fill="#1c2534"/>
+    <rect x="108" y="40" width="104" height="6" fill="#161d29"/>
+    <rect x="104" y="72" width="112" height="3" fill="#1a222e"/>
+    <!-- chaminé e fumaça -->
+    <rect x="170" y="24" width="12" height="18" fill="#151c26"/>
+    <rect x="167" y="21" width="18" height="4" fill="#1b2330"/>
+    <rect x="173" y="15" width="6" height="2" fill="#7fa8c9" opacity="0.28"/>
+    <rect x="178" y="10" width="8" height="2" fill="#7fa8c9" opacity="0.2"/>
+    <rect x="186" y="6" width="10" height="2" fill="#7fa8c9" opacity="0.13"/>
+    <!-- hera na parede -->
+    <g fill="#18251a">
+      <rect x="108" y="86" width="4" height="3"/><rect x="114" y="92" width="3" height="4"/><rect x="110" y="100" width="3" height="3"/>
+      <rect x="206" y="88" width="4" height="3"/><rect x="210" y="96" width="3" height="5"/><rect x="204" y="106" width="3" height="3"/>
+    </g>
+    <!-- janelas do andar de cima: uma acesa -->
+    <rect x="126" y="60" width="14" height="14" fill="#0a0f16"/>
+    <rect x="128" y="62" width="10" height="10" fill="#060a10"/>
+    <rect x="178" y="60" width="14" height="14" fill="#0a0f16"/>
+    <rect x="180" y="62" width="10" height="10" fill="#d6a35c"/>
+    <rect x="184" y="62" width="1" height="10" fill="#0b141d"/>
+    <rect x="180" y="66" width="10" height="1" fill="#0b141d"/>
+    <rect x="176" y="58" width="18" height="2" fill="#d6a35c" opacity="0.14"/>
+    <!-- janelas do térreo: escuras -->
+    <rect x="116" y="98" width="16" height="16" fill="#0a0f16"/>
+    <rect x="118" y="100" width="12" height="12" fill="#060a10"/>
+    <rect x="123" y="100" width="1" height="12" fill="#0f1620"/>
+    <rect x="188" y="98" width="16" height="16" fill="#0a0f16"/>
+    <rect x="190" y="100" width="12" height="12" fill="#060a10"/>
+    <rect x="195" y="100" width="1" height="12" fill="#0f1620"/>
+    <!-- porta central + lampiões -->
+    <rect x="142" y="112" width="36" height="4" fill="#1a222e"/>
+    <rect x="146" y="116" width="28" height="26" fill="#181310"/>
+    <rect x="150" y="120" width="20" height="22" fill="#100c09"/>
+    <rect x="158" y="131" width="2" height="2" fill="#d6a35c" opacity="0.7"/>
+    <rect x="138" y="120" width="4" height="5" fill="#d6a35c"/>
+    <rect x="178" y="120" width="4" height="5" fill="#d6a35c"/>
+    <rect x="136" y="118" width="8" height="2" fill="#0a0f16"/>
+    <rect x="176" y="118" width="8" height="2" fill="#0a0f16"/>
+    <!-- base em sombra -->
+    <rect x="100" y="142" width="120" height="6" fill="#04070b"/>
+  </g>
+
+  <!-- caminho de cascalho até a porta -->
+  <g fill="#1d2836">
+    <rect x="149" y="148" width="22" height="6"/>
+    <rect x="144" y="154" width="32" height="7"/>
+    <rect x="139" y="161" width="42" height="8"/>
+    <rect x="133" y="169" width="54" height="9"/>
+    <rect x="125" y="178" width="70" height="10"/>
+    <rect x="116" y="188" width="88" height="12"/>
+  </g>
+  <g fill="#263242">
+    <rect x="152" y="150" width="2" height="2"/><rect x="162" y="156" width="2" height="2"/><rect x="146" y="163" width="2" height="2"/>
+    <rect x="170" y="166" width="2" height="2"/><rect x="142" y="172" width="2" height="2"/><rect x="168" y="181" width="2" height="2"/>
+    <rect x="150" y="192" width="2" height="2"/><rect x="182" y="192" width="2" height="2"/><rect x="130" y="183" width="2" height="2"/>
+  </g>
+
+  <!-- roseiras mortas ladeando o caminho -->
+  <g>
+    <rect x="84" y="118" width="3" height="26" fill="#241a12"/>
+    <rect x="92" y="124" width="3" height="20" fill="#241a12"/>
+    <rect x="76" y="126" width="3" height="18" fill="#1e150e"/>
+    <rect x="72" y="142" width="26" height="4" fill="#1a120c"/>
+    <rect x="80" y="114" width="2" height="2" fill="#4a3220"/><rect x="88" y="110" width="2" height="2" fill="#4a3220"/>
+    <rect x="95" y="120" width="2" height="2" fill="#3a281a"/><rect x="74" y="122" width="2" height="2" fill="#3a281a"/>
+    <rect x="228" y="118" width="3" height="26" fill="#241a12"/>
+    <rect x="238" y="126" width="3" height="18" fill="#1e150e"/>
+    <rect x="248" y="122" width="3" height="22" fill="#241a12"/>
+    <rect x="224" y="142" width="30" height="4" fill="#1a120c"/>
+    <rect x="232" y="112" width="2" height="2" fill="#4a3220"/><rect x="246" y="116" width="2" height="2" fill="#4a3220"/>
+    <rect x="252" y="124" width="2" height="2" fill="#3a281a"/><rect x="226" y="128" width="2" height="2" fill="#3a281a"/>
+  </g>
+
+  <!-- banco de madeira à esquerda -->
+  <g>
+    <rect x="30" y="126" width="42" height="4" fill="#1e1610"/>
+    <rect x="30" y="118" width="42" height="3" fill="#241a12"/>
+    <rect x="34" y="118" width="3" height="12" fill="#171009"/>
+    <rect x="64" y="118" width="3" height="12" fill="#171009"/>
+    <rect x="32" y="130" width="3" height="10" fill="#171009"/>
+    <rect x="66" y="130" width="3" height="10" fill="#171009"/>
+  </g>
+
+  <!-- portão e cerca em primeiro plano -->
+  <g fill="#0d131c">
+    <rect x="4" y="150" width="12" height="50"/>
+    <rect x="2" y="146" width="16" height="5"/>
+    <rect x="303" y="150" width="12" height="50"/>
+    <rect x="301" y="146" width="16" height="5"/>
+    <rect x="0" y="178" width="320" height="3"/>
+  </g>
+
+  <!-- neblina rasteira -->
+  <rect x="0" y="128" width="320" height="3" fill="#7fa8c9" opacity="0.05"/>
+  <rect x="0" y="150" width="320" height="2" fill="#7fa8c9" opacity="0.04"/>
+
+  <!-- folhas secas caindo -->
+  <g fill="#4a3220">
+    <rect x="120" y="120" width="2" height="2"/><rect x="186" y="108" width="2" height="2"/>
+    <rect x="98" y="134" width="2" height="2"/><rect x="222" y="130" width="2" height="2"/>
+    <rect x="156" y="96" width="2" height="2"/><rect x="264" y="140" width="2" height="2"/>
+  </g>
+</svg>

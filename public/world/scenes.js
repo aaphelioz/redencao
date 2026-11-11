@@ -11,8 +11,13 @@ window.RedencaoIntroScene = class IntroScene extends Phaser.Scene {
 
   create() {
     const RW = window.RedencaoWorld;
-    window.RedencaoTextures.create(this);
+    // Campanha paralela com progresso salvo: retoma direto no cômodo, sem prólogo.
     const s = RW.state;
+    if (s && s.skipIntro && s.campaign === 'arquivo047') {
+      this.scene.start('RoomScene', { room: s.currentRoom || 'sala', spawnX: 384, spawnY: 330 });
+      return;
+    }
+    window.RedencaoTextures.create(this);
     if (s) {
       s.scene = 'intro';
       s.dialogOpen = true;
@@ -181,14 +186,36 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
       if (!isDecal) addObstacle(item.x, item.y, w, h);
     });
 
+    // NPCs da campanha paralela (Helena) — caminham pelo mesmo ciclo de interação
+    const npcChapter = RW.state && RW.state.chapter ? RW.state.chapter : 0;
+    const npcDefs = (RW.state && RW.state.campaign === 'arquivo047' && RW.story.npcs
+      && RW.story.npcs[npcChapter] && RW.story.npcs[npcChapter][this.roomId]) || [];
+    npcDefs.forEach((npc) => {
+      const scale = npc.scale || 2.1;
+      const img = this.add.image(npc.x, npc.y, npc.texture).setOrigin(0.5, 1).setScale(scale).setDepth(npc.y);
+      const w = img.displayWidth;
+      const h = img.displayHeight;
+      this.obstacles.push({ x: npc.x - w * 0.3, y: npc.y - 12, w: w * 0.6, h: 12 });
+      this.props.push({
+        ...npc,
+        img,
+        w,
+        h,
+        x: npc.x - w / 2,
+        y: npc.y - h,
+        isNpc: true,
+      });
+    });
+
     // Corredor cenográfico
     if (this.roomId === 'sala') {
       this.add.image(384, 268, 'prop-rug').setOrigin(0.5, 0.5).setDepth(40);
     }
 
-    // Marcador "!" flutuante sobre objetos não examinados
+    // Marcador "!" flutuante sobre objetos não examinados (NPCs não recebem marcador)
     this.markers = new Map();
     this.props.forEach((prop) => {
+      if (prop.isNpc) return;
       const marker = this.add.image(prop.x + prop.w / 2, prop.y - 6, 'marker')
         .setOrigin(0.5, 1).setScale(2).setDepth(10000);
       marker.baseY = prop.y - 6;
@@ -245,6 +272,11 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
       }
     }
 
+    // Douglas — ou Albrecht, o marido (campanha paralela)
+    const isArquivoJogado = RW.state && RW.state.campaign === 'arquivo047';
+    const playerPrefix = isArquivoJogado ? 'marito' : 'doug';
+    this.playerPrefix = playerPrefix;
+
     // Douglas
     const spawnX = (data && Number.isFinite(data.spawnX)) ? data.spawnX : 384;
     const spawnY = (data && Number.isFinite(data.spawnY)) ? data.spawnY : 330;
@@ -252,7 +284,7 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
 
     // Resolução final impossível de falhar: se o spawn cair dentro de uma parede
     // ou móvel, empurra o Douglas para fora — ele jamais fica preso.
-    this.player = this.add.image(spawnX, spawnY, 'doug-idle').setOrigin(0.5, 1).setScale(2.2).setDepth(spawnY);
+    this.player = this.add.image(spawnX, spawnY, `${playerPrefix}-idle`).setOrigin(0.5, 1).setScale(2.2).setDepth(spawnY);
     let guard = 0;
     while (window.RedencaoRooms.rectHitsSolid(this.map, this.player.x - 9, this.player.y - 12, 18, 12) && guard < 14) {
       this.player.y += 14;
@@ -304,7 +336,7 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
     // disponibilidade de interações calculada uma vez por sala (não por frame)
     this.propAvailability = new Map();
     this.props.forEach((prop) => {
-      this.propAvailability.set(prop.id, window.RedencaoWorld.isInteractionAvailable(this.roomId, prop.id));
+      this.propAvailability.set(prop.id, prop.isNpc ? true : window.RedencaoWorld.isInteractionAvailable(this.roomId, prop.id));
     });
 
     this.cameras.main.fadeIn(240, 4, 7, 11);
@@ -326,15 +358,17 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
     const dialogOpen = s.dialogOpen;
 
     // Marcadores flutuam; só marcamos o que o modo permite examinar
+    const isArquivo047 = s.campaign === 'arquivo047';
     this.markers.forEach((marker, id) => {
       const examined = id === 'well' ? false : s.examined.has(id);
-      const available = id === 'well' || this.propAvailability.get(id) !== false;
+      const wellOpen = id === 'well' && !isArquivo047;
+      const available = wellOpen || this.propAvailability.get(id) !== false;
       marker.setVisible(available && !examined);
       marker.y = marker.baseY + Math.sin(time / 320 + marker.baseY) * 4;
     });
 
     if (dialogOpen) {
-      this.player.setTexture('doug-idle');
+      this.player.setTexture(`${this.playerPrefix}-idle`);
       window.RedencaoWorld.showDoorPrompt(null);
       return;
     }
@@ -398,13 +432,13 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
       if (strideIndex !== this.lastStride) {
         this.lastStride = strideIndex;
         this.player.setTexture(running
-          ? (strideIndex % 2 === 0 ? 'doug-walk' : 'doug-run')
-          : (strideIndex % 2 === 0 ? 'doug-idle' : 'doug-walk'));
+          ? (strideIndex % 2 === 0 ? `${this.playerPrefix}-walk` : `${this.playerPrefix}-run`)
+          : (strideIndex % 2 === 0 ? `${this.playerPrefix}-idle` : `${this.playerPrefix}-walk`));
         RW.sfx('step');
       }
       this.player.y = body.y + Math.sin(this.walkCycle * Math.PI * 2) * (running ? 1.0 : 0.55);
     } else {
-      this.player.setTexture('doug-idle');
+      this.player.setTexture(`${this.playerPrefix}-idle`);
       this.vel.x = 0;
       this.vel.y = 0;
       this.walkCycle = 0;
@@ -443,8 +477,9 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
   }
 
   interactionLabel(id) {
-    if (id === 'well') return 'Descer até o poço';
-    const room = window.REDENCAO_STORY.rooms[this.roomId];
+    if (id === 'well') return window.RedencaoWorld.story.wellLabel || 'Descer até o poço';
+    if (id === 'helena') return 'Falar com Helena';
+    const room = window.RedencaoWorld.story.rooms[this.roomId];
     if (room) {
       const interaction = room.interactions.find((i) => i.id === id);
       if (interaction) return interaction.label;
@@ -455,16 +490,36 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
   interact(prop) {
     const RW = window.RedencaoWorld;
     const id = prop.id;
-    if (id !== 'well' && !RW.isInteractionAvailable(this.roomId, id)) {
-      // NO MERCY: nem tudo precisa ser examinado — a casa decide
+    if (prop.isNpc) {
       RW.sfx('ui');
-      RW.showDoorPrompt('Você não encontra nada útil ali');
+      RW.openNpcDialog(prop);
+      return;
+    }
+    if (id !== 'well' && !RW.isInteractionAvailable(this.roomId, id)) {
+      // NO MERCY / Arquivo 047: nem tudo está disponível ainda
+      RW.sfx('ui');
+      const lockedMsg = RW.state && RW.state.campaign === 'arquivo047'
+        ? 'Ainda não. Há uma ordem para estas coisas'
+        : 'Você não encontra nada útil ali';
+      RW.showDoorPrompt(lockedMsg);
       window.setTimeout(() => {
         if (!RW.state.dialogOpen) RW.showDoorPrompt(null);
       }, 1500);
       return;
     }
     RW.sfx('ui');
+    if (prop.id === 'well' && RW.state && RW.state.campaign === 'arquivo047') {
+      // o poço só abre no capítulo 5
+      if (!RW.isInteractionAvailable(this.roomId, 'jardim-well')) {
+        RW.showDoorPrompt('Ainda não. Há uma ordem para estas coisas');
+        window.setTimeout(() => {
+          if (!RW.state.dialogOpen) RW.showDoorPrompt(null);
+        }, 1500);
+        return;
+      }
+      RW.openArquivo047Well();
+      return;
+    }
     if (prop.id === 'well') {
       RW.openWellFlow();
       return;

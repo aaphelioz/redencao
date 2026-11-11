@@ -9,18 +9,19 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23070d14'/%3E%3Cpath d='M9 8h8a5 5 0 0 1 0 10h-8zM9 18h7l6 6h-7z' fill='%237fa8c9'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/fonts/press-start-2p-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=2">
-  <link rel="stylesheet" href="world/world.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="world/world.css?v=3">
   <script src="audio.js?v=2" defer></script>
   <script src="story.js?v=2" defer></script>
-  <script src="api.js?v=2" defer></script>
+  <script src="arquivo047.js?v=1" defer></script>
+  <script src="api.js?v=3" defer></script>
   <script src="vendor/phaser.min.js?v=2" defer></script>
-  <script src="world/textures.js?v=2" defer></script>
+  <script src="world/textures.js?v=3" defer></script>
   <script src="world/rooms.js?v=2" defer></script>
-  <script src="world/scenes.js?v=2" defer></script>
+  <script src="world/scenes.js?v=3" defer></script>
   <script src="world/combat.js?v=3" defer></script>
-  <script src="world/main.js?v=3" defer></script>
-  <script src="app.js?v=2" defer></script>
+  <script src="world/main.js?v=4" defer></script>
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
   <div class="atmosphere" aria-hidden="true">
@@ -39,6 +40,10 @@
 
     <nav class="menu__nav" aria-label="Menu principal">
       <button class="btn" type="button" data-action="play">Jogar</button>
+      <button class="btn btn--arquivo047" type="button" data-action="arquivo047">
+        <span class="btn__label">ARQUIVO 047</span>
+        <span class="btn__sub">Algumas histórias deveriam permanecer esquecidas.</span>
+      </button>
       <button class="btn" type="button" data-action="options">Opções</button>
       <button class="btn" type="button" data-action="store">Loja</button>
       <button class="btn" type="button" data-action="achievements">Conquistas</button>
@@ -48,6 +53,33 @@
     <p class="menu__status" id="menu-status" role="status" aria-live="polite"></p>
     <p class="menu__coins" id="menu-coins" aria-live="polite">💰 —</p>
   </main>
+
+  <section class="arquivo-screen" id="arquivo-047-screen" hidden aria-labelledby="arquivo-047-title">
+    <div class="arquivo-screen__frame">
+      <figure class="arquivo-screen__art">
+        <img src="assets/arquivo-047-mansion.svg" alt="A Mansão Albrecht vista do jardim ao entardecer, com as roseiras mortas e uma única janela acesa no andar de cima." width="320" height="200">
+        <figcaption class="arquivo-screen__artcap">Mansão Albrecht — arquivo do casal, 1998</figcaption>
+      </figure>
+      <div class="arquivo-screen__panel">
+        <p class="arquivo-screen__eyebrow">Uma campanha paralela</p>
+        <h1 class="arquivo-screen__title" id="arquivo-047-title">ARQUIVO 047</h1>
+        <p class="arquivo-screen__desc">Antes dos acontecimentos de Redenção, a Mansão Albrecht já guardava dois corações — e um arquivo. Você assume o papel de Albrecht, o marido de Helena: responsável pelas correspondências e pelos registros do casal. Aos poucos, a rotina cotidiana revela o esquema entre a mansão e o Colégio Estadual Presidente Kennedy. Fotografias circulam, documentos somem, e um número insiste em tudo: 047.</p>
+        <p class="arquivo-screen__lore">Cinco capítulos de investigação. Nenhum tiro obrigatório. O progresso é salvo neste servidor — independente da campanha principal.</p>
+        <ol class="arquivo-screen__chapters" id="arquivo-047-chapters" aria-label="Capítulos de ARQUIVO 047"></ol>
+        <p class="arquivo-screen__status" id="arquivo-047-status" role="status" aria-live="polite"></p>
+        <div class="arquivo-screen__actions">
+          <button class="btn btn--primary arquivo-screen__button" id="arquivo-047-start" type="button">
+            <span class="btn__label">INICIAR</span>
+            <span class="btn__sub" id="arquivo-047-continue" hidden>Continuar de onde parou</span>
+          </button>
+          <button class="btn btn--ghost arquivo-screen__button" id="arquivo-047-back" type="button">
+            <span class="btn__label">VOLTAR</span>
+          </button>
+        </div>
+        <button class="arquivo-screen__reset" id="arquivo-047-reset" type="button" hidden>Recomeçar do início</button>
+      </div>
+    </div>
+  </section>
 
   <dialog class="panel panel--mode" id="panel-mode" aria-labelledby="mode-title">
     <div class="panel__inner">
@@ -109,6 +141,7 @@
     </header>
     <div class="world" id="world">
       <div class="world__canvas" id="world-canvas" aria-label="Mansão Albrecht — mundo explorável"></div>
+      <div class="chapter-tint" id="chapter-tint" hidden aria-hidden="true"></div>
       <p class="world__prompt" id="world-prompt" hidden></p>
 
       <div class="dialog" id="dialog" role="dialog" aria-modal="false" aria-labelledby="dialog-title" hidden>
@@ -203,7 +236,7 @@
         <button class="panel__close" type="button" data-close aria-label="Fechar conquistas">×</button>
       </header>
       <div class="panel__body">
-        <p class="achievements__count" id="achievements-count">0 / 13</p>
+        <p class="achievements__count" id="achievements-count">0 / 14</p>
         <ul class="medals" id="medals" aria-label="Conquistas bloqueadas"></ul>
       </div>
     </div>

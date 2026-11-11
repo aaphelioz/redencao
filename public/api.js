@@ -21,6 +21,22 @@
     return response.json();
   }
 
+  // ===== ARQUIVO 047 (campanha paralela) =====
+  async function getArquivo047Progress() {
+    return request('/arquivo047');
+  }
+
+  async function saveArquivo047Progress(partial) {
+    return request('/arquivo047', {
+      method: 'POST',
+      body: JSON.stringify(partial || {}),
+    });
+  }
+
+  async function resetArquivo047Progress() {
+    return request('/arquivo047/reset', { method: 'POST' });
+  }
+
   // ===== SAVES =====
   async function listSaves() {
     return request('/saves');
@@ -110,6 +126,9 @@
 
   // Expose globally
   window.RedencaoAPI = {
+    getArquivo047Progress,
+    saveArquivo047Progress,
+    resetArquivo047Progress,
     listSaves,
     loadSave,
     saveGame,

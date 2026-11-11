@@ -3,7 +3,7 @@
 (() => {
   const STORAGE_KEY = 'redencao:volumes';
   const DEFAULT_VOLUMES = Object.freeze({ master: 0.7, ambient: 0.6 });
-  const TOTAL_ACHIEVEMENTS = 13;
+  const TOTAL_ACHIEVEMENTS = 14;
 
   const audio = window.RedencaoAudio;
   const api = window.RedencaoAPI;
@@ -56,6 +56,22 @@
     mode: document.getElementById('panel-mode'),
     modeResult: document.getElementById('panel-mode-result'),
   };
+
+  const arquivoScreen = document.getElementById('arquivo-047-screen');
+  const arquivoStart = document.getElementById('arquivo-047-start');
+  const arquivoContinue = document.getElementById('arquivo-047-continue');
+  const arquivoBack = document.getElementById('arquivo-047-back');
+  const arquivoReset = document.getElementById('arquivo-047-reset');
+  const arquivoChapters = document.getElementById('arquivo-047-chapters');
+  const arquivoStatus = document.getElementById('arquivo-047-status');
+
+  const ARQUIVO047_CHAPTER_NAMES = [
+    'A Casa em Ordem',
+    'Correspondências',
+    'O Esquema',
+    'O Que Nem Ela Sabe',
+    'A Última Correspondência',
+  ];
 
   let pendingMode = null;
 
@@ -232,6 +248,7 @@
     sobrevivente_nato: { name: 'Sobrevivente Nato', desc: 'Vença o combate final com 1 HP', icon: '❤️' },
     speedrunner: { name: 'Speedrunner', desc: 'Zere o jogo em menos de 15 minutos', icon: '⏱️' },
     arquivos_esquecidos: { name: 'Arquivos Esquecidos', desc: 'Você encontrou uma conexão que deveria permanecer oculta.', icon: '🗂️' },
+    arquivo_047: { name: 'ARQUIVO 047', desc: 'Descubra a verdade escondida entre os muros da Mansão Albrecht.', icon: '📁' },
   };
 
   function getAchievementName(id) {
@@ -312,7 +329,106 @@
     else showStatus('Caso em andamento...');
   }
 
+  // ===== ARQUIVO 047 (campanha paralela) =====
+  function openArquivo047Screen() {
+    if (!arquivoScreen) return;
+    renderArquivo047Progress();
+    arquivoScreen.hidden = false;
+    if (menu) menu.hidden = true;
+    if (arquivoStart) window.requestAnimationFrame(() => arquivoStart.focus({ preventScroll: true }));
+  }
+
+  function closeArquivo047Screen() {
+    if (!arquivoScreen) return;
+    arquivoScreen.hidden = true;
+    if (menu) {
+      menu.hidden = false;
+      const arquivoButton = menu.querySelector('[data-action="arquivo047"]');
+      if (arquivoButton) arquivoButton.focus({ preventScroll: true });
+    }
+  }
+
+  async function renderArquivo047Progress() {
+    if (!arquivoChapters || !arquivoStatus) return;
+    let progress = null;
+    try {
+      progress = await api.getArquivo047Progress();
+    } catch (e) {
+      console.error('Não foi possível carregar o progresso de ARQUIVO 047', e);
+    }
+
+    const done = Boolean(progress && progress.done);
+    const currentChapter = progress && Number(progress.chapter) ? Math.min(5, Math.max(1, Number(progress.chapter))) : 1;
+    const completed = (progress && progress.completed) || {};
+    const started = done || currentChapter > 1 || Object.keys(completed).length > 0 || (Array.isArray(progress && progress.examined) && progress.examined.length > 0);
+
+    arquivoChapters.replaceChildren(...ARQUIVO047_CHAPTER_NAMES.map((name, index) => {
+      const n = index + 1;
+      const isDone = done || Boolean(completed[n]);
+      const isCurrent = !done && started && n === currentChapter;
+      const isAvailable = !done && !started && n === 1;
+      const item = document.createElement('li');
+      item.className = `arquivo-screen__chapter${isDone ? ' arquivo-screen__chapter--done' : ''}${isCurrent || isAvailable ? ' arquivo-screen__chapter--current' : ''}`;
+
+      const numeral = document.createElement('span');
+      numeral.className = 'arquivo-screen__chapter-numeral';
+      numeral.setAttribute('aria-hidden', 'true');
+      numeral.textContent = ['I', 'II', 'III', 'IV', 'V'][index];
+
+      const label = document.createElement('span');
+      label.className = 'arquivo-screen__chapter-name';
+      label.textContent = name;
+
+      const stateIcon = document.createElement('span');
+      stateIcon.className = 'arquivo-screen__chapter-state';
+      stateIcon.textContent = isDone ? 'Concluído' : (isCurrent ? 'Em andamento' : (isAvailable ? 'Disponível' : 'Bloqueado'));
+
+      item.append(numeral, label, stateIcon);
+      return item;
+    }));
+
+    if (done) {
+      arquivoStatus.textContent = 'Campanha concluída. O Arquivo 047 não guarda mais segredos de você.';
+    } else if (started) {
+      arquivoStatus.textContent = `Em andamento — Capítulo ${['I', 'II', 'III', 'IV', 'V'][currentChapter - 1]}. O progresso foi salvo neste servidor.`;
+    } else {
+      arquivoStatus.textContent = 'Não iniciada. Cinco capítulos à frente.';
+    }
+
+    if (arquivoContinue) arquivoContinue.hidden = !started || done;
+    if (arquivoReset) arquivoReset.hidden = !started || done;
+  }
+
+  async function startArquivo047FromScreen() {
+    if (arquivoScreen) arquivoScreen.hidden = true;
+    if (window.RedencaoGame && typeof window.RedencaoGame.startArquivo047 === 'function') {
+      try {
+        await window.RedencaoGame.startArquivo047();
+      } catch (e) {
+        console.error('Erro ao iniciar ARQUIVO 047', e);
+        if (menu) menu.hidden = false;
+      }
+    } else if (menu) {
+      menu.hidden = false;
+      showStatus('Caso em andamento...');
+    }
+  }
+
+  async function resetArquivo047FromScreen() {
+    try {
+      await api.resetArquivo047Progress();
+    } catch (e) {
+      console.error('Não foi possível apagar o progresso de ARQUIVO 047', e);
+    }
+    await renderArquivo047Progress();
+  }
+
   // ===== EVENT LISTENERS =====
+  if (arquivoStart) arquivoStart.addEventListener('click', () => { startArquivo047FromScreen(); });
+  if (arquivoBack) arquivoBack.addEventListener('click', () => { closeArquivo047Screen(); });
+  if (arquivoReset) arquivoReset.addEventListener('click', () => { resetArquivo047FromScreen(); });
+
+
   if (menu) {
     menu.addEventListener('click', (event) => {
       const button = event.target.closest('[data-action]');
@@ -320,6 +436,7 @@
 
       switch (button.dataset.action) {
         case 'play': showModeSelection(); break;
+        case 'arquivo047': openArquivo047Screen(); break;
         case 'options': openPanel(panels.options); break;
         case 'store': 
           openPanel(panels.store); 

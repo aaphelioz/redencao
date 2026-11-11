@@ -784,6 +784,76 @@
   text-shadow: 0 0 12px rgba(216, 180, 106, 0.35);
 }
 
+/* ============ ARQUIVO 047 — tint de atmosfera por capítulo ============ */
+.chapter-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 1;
+  transition: background 1200ms ease;
+  mix-blend-mode: normal;
+}
+
+body.chapter-1 .chapter-tint {
+  /* manhã de outono — âmbar discreto, casa em ordem */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(216, 180, 106, 0.055), transparent 62%),
+    linear-gradient(180deg, rgba(23, 17, 8, 0.1), rgba(6, 5, 3, 0.12));
+}
+
+body.chapter-2 .chapter-tint {
+  /* correspondências — papel envelhecido */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(196, 164, 110, 0.075), transparent 62%),
+    linear-gradient(180deg, rgba(24, 18, 9, 0.16), rgba(6, 5, 3, 0.18));
+}
+
+body.chapter-3 .chapter-tint {
+  /* o esquema — sépia carregado, caixas e inventários */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(164, 132, 76, 0.09), transparent 62%),
+    linear-gradient(180deg, rgba(20, 15, 6, 0.24), rgba(5, 4, 2, 0.24));
+}
+
+body.chapter-4 .chapter-tint {
+  /* o que nem ela sabe — frio, sombra mais densa */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(74, 96, 128, 0.08), transparent 60%),
+    linear-gradient(180deg, rgba(3, 6, 12, 0.34), rgba(2, 3, 6, 0.34));
+}
+
+body.chapter-5 .chapter-tint {
+  /* a última correspondência — quase sem luz */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 42%, rgba(28, 24, 26, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(1, 2, 4, 0.48), rgba(1, 1, 2, 0.5));
+}
+
+.letter--final {
+  border-left-color: rgba(216, 180, 106, 0.65);
+  background: linear-gradient(160deg, rgba(32, 25, 13, 0.94), rgba(12, 10, 6, 0.95));
+  box-shadow:
+    0 0 34px rgba(216, 180, 106, 0.09),
+    inset 0 0 30px rgba(0, 0, 0, 0.45);
+}
+
+.letter--final .letter__kicker {
+  color: rgba(196, 96, 66, 0.9);
+}
+
+.letter--final .letter__title {
+  color: #e9d9a6;
+}
+
+.scene--arquivo047 {
+  border-color: rgba(216, 180, 106, 0.45);
+  box-shadow:
+    0 0 40px rgba(216, 180, 106, 0.12),
+    0 28px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 /* ============ RESPONSIVO ============ */
 @media (max-width: 720px) {
   .world {
@@ -849,8 +919,10 @@
   .ending,
   .archive,
   .archive__folder,
-  .archive__paper {
+  .archive__paper,
+  .chapter-tint {
     animation: none;
+    transition: none;
   }
 
   .archive.archive--closing,

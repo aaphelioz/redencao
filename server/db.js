@@ -75,6 +75,25 @@ function init() {
     );
   `);
 
+  // ===== ARQUIVO 047 — progressão independente da campanha paralela =====
+  // Tabela própria: nunca toca em `saves`, `inventory`, `achievements` ou `stats`.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS arquivo047_progress (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      chapter INTEGER NOT NULL DEFAULT 1,
+      examined TEXT NOT NULL DEFAULT '[]',
+      flags TEXT NOT NULL DEFAULT '{}',
+      completed TEXT NOT NULL DEFAULT '{}',
+      done INTEGER DEFAULT 0,
+      currentRoom TEXT NOT NULL DEFAULT 'sala',
+      updatedAt INTEGER NOT NULL
+    );
+  `);
+  const a047 = db.prepare('SELECT * FROM arquivo047_progress WHERE id = 1').get();
+  if (!a047) {
+    db.prepare("INSERT INTO arquivo047_progress (id, chapter, examined, flags, completed, done, currentRoom, updatedAt) VALUES (1, 1, '[]', '{}', '{}', 0, 'sala', ?)").run(Date.now());
+  }
+
   // Insert default rows if not exist
   const insertDefaults = db.transaction(() => {
     // Default inventory
@@ -93,7 +112,7 @@ function init() {
     const achievementIds = [
       'primeiro_investimento', 'arsenal_completo', 'farmaceutico', 'medico_campo', 'carniceiro',
       'primeiro_caso', 'sem_piedade', 'roleta_russa', 'detetive_obsessivo', 'leitor_atento',
-      'sobrevivente_nato', 'speedrunner', 'arquivos_esquecidos'
+      'sobrevivente_nato', 'speedrunner', 'arquivos_esquecidos', 'arquivo_047'
     ];
     const stmt = db.prepare('INSERT OR IGNORE INTO achievements (id, unlocked, progress) VALUES (?, 0, 0)');
     for (const id of achievementIds) {
@@ -458,6 +477,73 @@ function buyItem(itemId) {
   };
 }
 
+// ===== ARQUIVO 047 OPERATIONS =====
+// Progresso próprio da campanha paralela: ler, mesclar, redefinir.
+// Nunca interfere nos dados da campanha principal.
+const getA047Stmt = db.prepare('SELECT * FROM arquivo047_progress WHERE id = 1');
+const updateA047Stmt = db.prepare(`
+  UPDATE arquivo047_progress SET chapter = ?, examined = ?, flags = ?, completed = ?, done = ?, currentRoom = ?, updatedAt = ? WHERE id = 1
+`);
+
+const A047_DEFAULTS = {
+  chapter: 1,
+  examined: [],
+  flags: {},
+  completed: {},
+  done: false,
+  currentRoom: 'sala',
+};
+
+function parseJson(raw, fallback) {
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getArquivo047() {
+  const row = getA047Stmt.get();
+  if (!row) return { ...A047_DEFAULTS };
+  return {
+    chapter: Math.min(5, Math.max(1, Number(row.chapter) || 1)),
+    examined: Array.isArray(parseJson(row.examined, [])) ? parseJson(row.examined, []) : [],
+    flags: parseJson(row.flags, {}),
+    completed: parseJson(row.completed, {}),
+    done: Boolean(row.done),
+    currentRoom: row.currentRoom || 'sala',
+    updatedAt: row.updatedAt,
+  };
+}
+
+function saveArquivo047(partial = {}) {
+  const current = getArquivo047();
+  const next = {
+    chapter: Number.isFinite(partial.chapter) ? Math.min(5, Math.max(1, Math.floor(partial.chapter))) : current.chapter,
+    examined: Array.isArray(partial.examined) ? [...new Set(partial.examined)] : current.examined,
+    flags: partial.flags && typeof partial.flags === 'object' ? { ...current.flags, ...partial.flags } : current.flags,
+    completed: partial.completed && typeof partial.completed === 'object' ? { ...current.completed, ...partial.completed } : current.completed,
+    done: typeof partial.done === 'boolean' ? partial.done : current.done,
+    currentRoom: typeof partial.currentRoom === 'string' && partial.currentRoom ? partial.currentRoom : current.currentRoom,
+  };
+  updateA047Stmt.run(
+    next.chapter,
+    JSON.stringify(next.examined),
+    JSON.stringify(next.flags),
+    JSON.stringify(next.completed),
+    next.done ? 1 : 0,
+    next.currentRoom,
+    Date.now()
+  );
+  return getArquivo047();
+}
+
+function resetArquivo047() {
+  updateA047Stmt.run(1, '[]', '{}', '{}', 0, 'sala', Date.now());
+  return getArquivo047();
+}
+
 module.exports = {
   db,
   saveGame,
@@ -485,4 +571,7 @@ module.exports = {
   getShopItems,
   buyItem,
   SHOP_ITEMS,
+  getArquivo047,
+  saveArquivo047,
+  resetArquivo047,
 };

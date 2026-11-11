@@ -31,8 +31,9 @@ O jogo agora é um mundo 2D explorável: Douglas anda pela mansão, cada cômodo
 
 ## Estado atual
 
-- Menu principal com **Jogar**, **Opções**, **Loja**, **Conquistas** e **Sair**.
+- Menu principal com **Jogar**, **ARQUIVO 047**, **Opções**, **Loja**, **Conquistas** e **Sair**.
 - **Jogar** abre o prólogo e inicia a história na Mansão Albrecht.
+- **ARQUIVO 047** abre a campanha paralela (ver seção abaixo).
 - Prólogo em estilo visual novel, com botão **Continuar**, Enter, Espaço ou W.
 - Exploração de cinco cômodos com 23 pontos de investigação no **STANDARD** e 15 no **NO MERCY** (3 por cômodo).
 - Carta de Helena que muda de cômodo a cada nova partida ou reinício.
@@ -132,9 +133,10 @@ README.md                 este documento
 public/
   index.html              menu, jogo e painéis
   styles.css              identidade visual noir e interface do jogo
-  app.js                  menu, painéis, volumes e integração com o jogo
+  app.js                  menu, painéis, volumes, tela do ARQUIVO 047 e integração com o jogo
   audio.js                trilha ambiente generativa e volumes
-  story.js                textos, cômodos, carta, combate e finais
+  story.js                textos, cômodos, carta, combate e finais (campanha principal)
+  arquivo047.js           textos e capítulos do ARQUIVO 047 (campanha paralela)
   game.js                 versão "de clique" original (referência; não mais carregada)
   world/
     textures.js           pixel art procedural (personagens, móveis, tiles, fundos)
@@ -145,6 +147,8 @@ public/
     world.css             estilos do mundo, diálogos, combate e finais
   vendor/phaser.min.js    Phaser 3/4 (motor 2D)
   assets/fonts/           Press Start 2P e Nunito em woff2
+  assets/menu-mansion.svg background do menu (pixel art)
+  assets/arquivo-047-mansion.svg ilustração da tela do ARQUIVO 047 (pixel art)
 ```
 
 ## Áudio e acessibilidade
@@ -164,6 +168,38 @@ public/
 - Cada conquista desbloqueada pela primeira vez rende **50 a 200 moedas**.
 - A derrota ainda concede 5 moedas de consolação.
 - O saldo fica salvo no SQLite (`redencao.db`), aparece no menu e é atualizado ao voltar da partida.
+
+## Modo ARQUIVO 047 — campanha paralela
+
+Uma campanha narrativa paralela, acessível pelo botão **ARQUIVO 047** do menu (subtítulo: *"Algumas histórias deveriam permanecer esquecidas."*). O jogador assume o papel de **Albrecht, o marido de Helena** — o dono da casa, responsável pelas correspondências e pelos registros do casal — no outono de 1998, antes dos acontecimentos de Redenção.
+
+A campanha apresenta o cotidiano do casal na Mansão Albrecht e revela, aos poucos, o esquema entre a casa e o **Colégio Estadual Presidente Kennedy**: a circulação e ocultação de documentos, registros, fotografias e inventários — e a existência de papéis que nem os dois conheciam completamente. Foco total em investigação e narrativa: **não há combate**. O número **047** funciona como referência recorrente, e a campanha se conecta diretamente ao Arquivo Kennedy encontrado no quarto do casal na campanha principal (sem substituir ou alterar o easter egg).
+
+### Estrutura
+
+- **Tela própria do modo** — título ARQUIVO 047, arte da Mansão Albrecht em pixel art (`assets/arquivo-047-mansion.svg`), descrição, lista dos cinco capítulos com o estado de cada um (Disponível / Em andamento / Concluído / Bloqueado), botões **INICIAR** e **VOLTAR**, e a opção sutil de recomeçar do início quando há progresso.
+- **Cinco capítulos**, cada um com objetivo próprio e pistas específicas (essenciais e opcionais):
+  1. **A Casa em Ordem** — a rotina do casal; Helena é introduzida pelos diálogos e interações.
+  2. **Correspondências** — as cartas do Presidente Kennedy; o 047 como referência recorrente; as primeiras evidências de que Helena esconde informações.
+  3. **O Esquema** — o inventário do cofre (senha `helena`), o livro de contabilidade com o carimbo ARQUIVO Nº 047, o galpão do jardim e a ligação mansão → colégio.
+  4. **O Que Nem Ela Sabe** — segredos que ela escondeu de você e vice-versa; a relação construída sobre desconfiança.
+  5. **A Última Correspondência** — descida ao poço; a carta final revela o destino dos documentos e conecta tudo ao Arquivo Kennedy da campanha principal. O final preserva mistérios propositalmente.
+- **Helena como NPC** — na sala (cap. 1), na cozinha (cap. 2), no quarto do casal (cap. 3) e no jardim (cap. 4); diálogo evolui por capítulo; no capítulo 5 a casa está vazia.
+- **Atmosfera** — tint quente a frio conforme os capítulos avançam (`.chapter-tint`), iluminação mais intimista, documentos envelhecidos no mesmo estilo visual do resto do jogo.
+- **Mesmos sistemas do jogo original** — exploração top-down Phaser, `E` para interagir, diálogos no mesmo componente, cofre com senha, galpão trancado por chave, `HUD` adaptado (`Capítulo I · Pistas x / y · Capítulos n / 5`), pixel art procedural.
+
+### Progressão independente
+
+- Tabela própria `arquivo047_progress` no SQLite (`server/db.js`) — **nada** é compartilhado com `saves`, `inventory`, `stats` ou `achievements`, além da nova conquista `arquivo_047` (14 conquistas no total).
+- Cada capítulo registra a própria conclusão (`completed` por número de capítulo) e o desbloqueio sequencial; pistas examinadas e flags (ex.: chave do galpão, cofre aberto) persistem no servidor.
+- **Continuar de onde parou** — ao INICIAR com progresso salvo, a campanha retoma direto no cômodo e capítulo salvos, sem o prólogo. Ao concluir e iniciar novamente, recomeça do zero.
+- A campanha principal **não é alterada**: mesmos dados, mesmos saves, mesmo easter egg.
+
+### Endpoints
+
+- `GET /api/arquivo047` — progresso atual (capítulo, pistas, flags, capítulos concluídos, conclusão).
+- `POST /api/arquivo047` — mescla progresso parcial.
+- `POST /api/arquivo047/reset` — apaga o progresso da campanha paralela.
 
 ## Easter egg — O Arquivo Kennedy
 

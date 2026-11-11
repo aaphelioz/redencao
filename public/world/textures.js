@@ -78,6 +78,12 @@ window.RedencaoTextures = (() => {
     add('doug-walk', pixelMap([...dougBody, ...dougLegsB], dougPalette, 2));
     add('doug-run', pixelMap([...dougBody, ...dougLegsRun], dougPalette, 5));
 
+    // Albrecht, o marido — mesma silhueta procedural, paleta envelhecida (campanha ARQUIVO 047)
+    const maritoPalette = { h: '#3f3f3f', H: '#5c5c5c', s: '#c9a184', S: '#a97e62', e: '#141414', c: '#3a2f24', C: '#2a231b', b: '#241f18', p: '#33291f', o: '#171310' };
+    add('marito-idle', pixelMap([...dougBody, ...dougLegsA], maritoPalette, 6));
+    add('marito-walk', pixelMap([...dougBody, ...dougLegsB], maritoPalette, 7));
+    add('marito-run', pixelMap([...dougBody, ...dougLegsRun], maritoPalette, 8));
+
     const helenPalette = { k: '#1b1b22', K: '#26262f', P: '#efe6da', p: '#cfc4b8', r: '#06070b', T: '#c9c2b4', t: '#8f887c', S: '#5e6b52' };
     const helenaRows = [
       '.....KKKKK.......',
