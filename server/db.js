@@ -80,7 +80,7 @@ function init() {
     // Default inventory
     const inv = db.prepare('SELECT * FROM inventory WHERE id = 1').get();
     if (!inv) {
-      db.prepare('INSERT INTO inventory (id, coins, weapon, ownedWeapons, seringas, kitsMedicos, updatedAt) VALUES (1, 0, NULL, "[]", 0, 0, ?)').run(Date.now());
+      db.prepare("INSERT INTO inventory (id, coins, weapon, ownedWeapons, seringas, kitsMedicos, updatedAt) VALUES (1, 0, NULL, '[]', 0, 0, ?)").run(Date.now());
     }
 
     // Default stats
