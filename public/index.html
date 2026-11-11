@@ -122,6 +122,32 @@
         </div>
       </div>
 
+      <!-- Easter egg: O Arquivo Kennedy (pasta no criado-mudo do quarto do casal) -->
+      <div class="archive" id="kennedy-archive" role="dialog" aria-modal="true" aria-labelledby="archive-title" hidden>
+        <div class="archive__backdrop" data-archive-close></div>
+        <div class="archive__folder" role="document">
+          <header class="archive__head">
+            <div class="archive__stamp" aria-hidden="true">
+              <span class="archive__stamp-no">ARQUIVO Nº 047</span>
+              <span class="archive__stamp-line">DOCUMENTAÇÃO INSTITUCIONAL — ACESSO RESTRITO</span>
+              <span class="archive__stamp-line">DATA DE ARQUIVAMENTO: 17/08/1998</span>
+            </div>
+            <h3 class="archive__title" id="archive-title">Colégio Estadual Presidente Kennedy</h3>
+            <div class="archive__meta">
+              <p class="archive__counter" id="archive-counter" aria-live="polite">Documentos examinados: 0/4</p>
+              <button type="button" class="archive__close" id="archive-close" aria-label="Fechar o arquivo">✕</button>
+            </div>
+          </header>
+          <nav class="archive__tabs" id="archive-tabs" aria-label="Documentos do arquivo"></nav>
+          <div class="archive__body">
+            <button type="button" class="archive__nav archive__nav--prev" id="archive-prev" aria-label="Documento anterior">‹</button>
+            <div class="archive__page" id="archive-page" tabindex="0"></div>
+            <button type="button" class="archive__nav archive__nav--next" id="archive-next" aria-label="Próximo documento">›</button>
+          </div>
+          <p class="archive__foot" id="archive-foot"></p>
+        </div>
+      </div>
+
       <div class="combat-dock" id="combat-dock" hidden>
         <div class="combat-dock__hud">
           <div id="combat-player"></div>
@@ -177,7 +203,7 @@
         <button class="panel__close" type="button" data-close aria-label="Fechar conquistas">×</button>
       </header>
       <div class="panel__body">
-        <p class="achievements__count" id="achievements-count">0 / 12</p>
+        <p class="achievements__count" id="achievements-count">0 / 13</p>
         <ul class="medals" id="medals" aria-label="Conquistas bloqueadas"></ul>
       </div>
     </div>

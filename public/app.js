@@ -3,7 +3,7 @@
 (() => {
   const STORAGE_KEY = 'redencao:volumes';
   const DEFAULT_VOLUMES = Object.freeze({ master: 0.7, ambient: 0.6 });
-  const TOTAL_ACHIEVEMENTS = 12;
+  const TOTAL_ACHIEVEMENTS = 13;
 
   const audio = window.RedencaoAudio;
   const api = window.RedencaoAPI;
@@ -231,6 +231,7 @@
     leitor_atento: { name: 'Leitor Atento', desc: 'Leia a carta de Helena antes de abrir o cofre', icon: '📜' },
     sobrevivente_nato: { name: 'Sobrevivente Nato', desc: 'Vença o combate final com 1 HP', icon: '❤️' },
     speedrunner: { name: 'Speedrunner', desc: 'Zere o jogo em menos de 15 minutos', icon: '⏱️' },
+    arquivos_esquecidos: { name: 'Arquivos Esquecidos', desc: 'Você encontrou uma conexão que deveria permanecer oculta.', icon: '🗂️' },
   };
 
   function getAchievementName(id) {

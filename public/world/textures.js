@@ -501,6 +501,20 @@ window.RedencaoTextures = (() => {
       ctx.fillStyle = '#cdd3da'; ctx.fillRect(14, 12, 30, 12);
     }));
 
+    // Pasta antiga do arquivo (easter egg: O Arquivo Kennedy), espiando da gaveta
+    add('prop-folder', makeCanvas(40, 18, (ctx) => {
+      ctx.fillStyle = '#8a7a54'; ctx.fillRect(3, 1, 12, 4); // aba da pasta
+      ctx.fillStyle = '#a89a6e'; ctx.fillRect(3, 1, 12, 1); // fio de luz na aba
+      ctx.fillStyle = '#b3a475'; ctx.fillRect(0, 5, 40, 11); // corpo amarelado
+      ctx.fillStyle = '#cbbd8e'; ctx.fillRect(0, 5, 40, 2); // dobra superior
+      ctx.fillStyle = '#7d7050'; ctx.fillRect(0, 13, 40, 3); // sombra inferior
+      ctx.fillStyle = '#6b5f43'; // carimbo quase apagado
+      ctx.fillRect(6, 9, 10, 1);
+      ctx.fillRect(6, 11, 7, 1);
+      ctx.fillStyle = '#5c5138'; ctx.fillRect(29, 9, 3, 3); // botão de fecho
+      ctx.fillRect(35, 9, 3, 3);
+    }));
+
     // Galpão do jardim
     add('prop-shed', makeCanvas(128, 124, (ctx) => {
       ctx.fillStyle = '#2e2620'; ctx.beginPath(); ctx.moveTo(4, 34); ctx.lineTo(64, 4); ctx.lineTo(124, 34); ctx.closePath(); ctx.fill(); // telhado

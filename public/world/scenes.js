@@ -174,7 +174,8 @@ window.RedencaoRoomScene = class RoomScene extends Phaser.Scene {
     (def.decor || []).forEach((item) => {
       const img = this.add.image(item.x, item.y, item.texture).setOrigin(0, 0);
       const isDecal = item.solid === false;
-      img.setDepth(isDecal ? item.y + 2 : item.y + img.displayHeight);
+      const depth = Number.isFinite(item.depth) ? item.depth : (isDecal ? item.y + 2 : item.y + img.displayHeight);
+      img.setDepth(depth);
       const w = img.displayWidth;
       const h = img.displayHeight;
       if (!isDecal) addObstacle(item.x, item.y, w, h);

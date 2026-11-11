@@ -268,6 +268,522 @@
   overflow-y: auto;
 }
 
+/* ============ ARQUIVO KENNEDY (easter egg) ============ */
+.archive {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+  animation: archive-in 260ms ease-out;
+}
+
+.archive[hidden] {
+  display: none;
+}
+
+.archive.archive--closing {
+  animation: archive-out 200ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes archive-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes archive-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.archive__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 5, 9, 0.78);
+  backdrop-filter: blur(2px);
+}
+
+.archive__folder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 46rem);
+  max-height: 100%;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  border: 1px solid rgba(216, 180, 106, 0.28);
+  border-radius: 6px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(84, 68, 38, 0.28), transparent 60%),
+    linear-gradient(168deg, #241d12 0%, #191410 55%, #100d09 100%);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 235, 190, 0.08),
+    inset 0 0 60px rgba(0, 0, 0, 0.55);
+  animation: archive-folder-in 320ms cubic-bezier(0.2, 1.2, 0.35, 1);
+}
+
+@keyframes archive-folder-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.archive--closing .archive__folder {
+  animation: none;
+  transform: translateY(10px) scale(0.98);
+  opacity: 0;
+  transition: opacity 180ms ease-in, transform 180ms ease-in;
+}
+
+/* Carimbo do arquivo — aparência de expediente institucional antigo */
+.archive__stamp {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0 auto 0.5rem;
+  padding: 0.4rem 1.1rem 0.45rem;
+  border: 2px solid rgba(164, 68, 47, 0.72);
+  border-radius: 3px;
+  color: rgba(196, 96, 66, 0.9);
+  transform: rotate(-1.6deg);
+  box-shadow: inset 0 0 0 1px rgba(164, 68, 47, 0.35);
+  text-align: center;
+  user-select: none;
+  mask-image: radial-gradient(120% 140% at 50% 50%, #000 62%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.archive__stamp-no {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.4vw, 0.68rem);
+  letter-spacing: 0.28em;
+}
+
+.archive__stamp-line {
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.archive__title {
+  margin: 0.15rem 0 0.35rem;
+  color: #d9c68f;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.55rem, 1.5vw, 0.78rem);
+  line-height: 1.6;
+  text-align: center;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.archive__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+  border-top: 1px solid rgba(216, 180, 106, 0.18);
+  border-bottom: 1px solid rgba(216, 180, 106, 0.18);
+  padding: 0.3rem 0.1rem;
+}
+
+.archive__counter {
+  margin: 0;
+  color: var(--blue-3);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.archive__close {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(216, 180, 106, 0.4);
+  border-radius: 4px;
+  background: rgba(20, 16, 10, 0.6);
+  color: #d8b46a;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.archive__close:hover {
+  background: rgba(216, 180, 106, 0.16);
+  color: #f0d490;
+  transform: scale(1.06);
+}
+
+.archive__close:focus-visible {
+  outline: 2px solid #d8b46a;
+  outline-offset: 2px;
+}
+
+/* Abas dos documentos */
+.archive__tabs {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.archive__tab {
+  flex: 1 1 0;
+  min-width: 5.2rem;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border: 1px solid rgba(216, 180, 106, 0.2);
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, #2b2417, #201b12);
+  color: #8d7f5f;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.archive__tab:hover:not(:disabled) {
+  color: #d8b46a;
+}
+
+.archive__tab:focus-visible {
+  outline: 2px solid #d8b46a;
+  outline-offset: 1px;
+}
+
+.archive__tab--active {
+  background: linear-gradient(180deg, #3a3220, #2b2517);
+  color: #e8d49a;
+  border-color: rgba(216, 180, 106, 0.45);
+  box-shadow: inset 0 2px 0 rgba(216, 180, 106, 0.35);
+}
+
+.archive__tab--locked {
+  color: #5b5442;
+  cursor: not-allowed;
+}
+
+.archive__tab--done::after {
+  content: ' ✓';
+  color: #7fa8c9;
+}
+
+/* Corpo com setas de navegação */
+.archive__body {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.archive__nav {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 2.1rem;
+  height: 2.9rem;
+  border: 1px solid rgba(216, 180, 106, 0.3);
+  border-radius: 4px;
+  background: rgba(20, 16, 10, 0.6);
+  color: #d8b46a;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 140ms ease, opacity 140ms ease;
+}
+
+.archive__nav:hover:not(:disabled) {
+  background: rgba(216, 180, 106, 0.14);
+}
+
+.archive__nav:disabled {
+  opacity: 0.22;
+  cursor: default;
+}
+
+.archive__nav:focus-visible {
+  outline: 2px solid #d8b46a;
+  outline-offset: 2px;
+}
+
+.archive__page {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  outline: none;
+}
+
+.archive__page:focus-visible {
+  outline: 2px solid rgba(216, 180, 106, 0.5);
+  outline-offset: -2px;
+}
+
+/* Papel envelhecido */
+.archive__paper {
+  position: relative;
+  margin: 0 auto;
+  max-width: 34rem;
+  padding: clamp(0.9rem, 2.4vw, 1.5rem) clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid rgba(46, 36, 20, 0.55);
+  border-radius: 2px;
+  background:
+    radial-gradient(140% 110% at 15% 0%, rgba(90, 66, 30, 0.22), transparent 55%),
+    radial-gradient(120% 130% at 90% 100%, rgba(74, 52, 24, 0.3), transparent 55%),
+    radial-gradient(60% 45% at 55% 20%, rgba(255, 246, 214, 0.28), transparent 70%),
+    linear-gradient(172deg, #e3d5a9 0%, #d5c491 48%, #c0ad7d 100%);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.55),
+    inset 0 0 40px rgba(74, 52, 24, 0.35);
+  color: #2b2417;
+  transform: rotate(-0.35deg);
+  animation: archive-paper-in 260ms ease-out;
+}
+
+@keyframes archive-paper-in {
+  from { opacity: 0; transform: rotate(-0.35deg) translateY(10px); }
+  to { opacity: 1; transform: rotate(-0.35deg) translateY(0); }
+}
+
+.archive__paper-kind {
+  margin: 0 0 0.15rem;
+  color: rgba(64, 46, 20, 0.75);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.archive__paper-title {
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(64, 46, 20, 0.4);
+  color: #241c0f;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.archive__paper-body p {
+  margin: 0 0 0.55rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.74rem;
+  line-height: 1.7;
+  color: #2b2417;
+}
+
+.archive__paper-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Doc 2 — relação de materiais */
+.archive__list {
+  margin: 0 0 0.55rem;
+  padding: 0;
+  list-style: none;
+}
+
+.archive__list-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0.2rem;
+  border-bottom: 1px dashed rgba(64, 46, 20, 0.35);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.74rem;
+}
+
+.archive__list-item:last-child {
+  border-bottom: 0;
+}
+
+.archive__hand {
+  flex: 0 1 auto;
+  color: #5a2f24;
+  font-family: 'Segoe Script', 'Bradley Hand', Georgia, serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  text-align: right;
+  transform: rotate(-1.8deg);
+  text-shadow: 0 0 1px rgba(90, 47, 36, 0.4);
+}
+
+.archive__paper-note {
+  margin: 0.6rem 0 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(64, 46, 20, 0.35);
+  color: rgba(64, 46, 20, 0.85);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+/* Doc 3 — fotografia de turma */
+.archive__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.archive__photo-frame {
+  max-width: 100%;
+  padding: 0.65rem 0.65rem 1.4rem;
+  background: #ddd6c2;
+  border: 1px solid rgba(46, 36, 20, 0.4);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(46, 36, 20, 0.25);
+  transform: rotate(0.6deg);
+}
+
+.archive__photo-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  filter: sepia(0.38) contrast(0.92) brightness(0.9);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  background: #20211f;
+}
+
+.archive__photo-caption {
+  margin: 0.4rem 0 0;
+  color: #3a3323;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.6rem;
+  text-align: center;
+  letter-spacing: 0.03em;
+}
+
+.archive__photo-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 11rem;
+  padding: 1rem 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background:
+    radial-gradient(50% 50% at 50% 38%, rgba(255, 252, 238, 0.35), transparent 80%),
+    linear-gradient(160deg, #e8e2cd, #cfc7ab);
+  text-align: center;
+}
+
+.archive__photo-back-inscription {
+  margin: 0;
+  color: #33302a;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: clamp(0.85rem, 2.4vw, 1.1rem);
+  letter-spacing: 0.08em;
+  transform: rotate(-1.2deg);
+}
+
+.archive__photo-stamp {
+  width: 3.2rem;
+  height: 3.2rem;
+  border: 2px solid rgba(64, 46, 20, 0.5);
+  border-radius: 50%;
+  opacity: 0.55;
+  mask-image: radial-gradient(circle, #000 60%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+.archive__flip {
+  padding: 0.4rem 1rem;
+  border: 1px solid rgba(64, 46, 20, 0.55);
+  border-radius: 3px;
+  background: rgba(64, 46, 20, 0.12);
+  color: #2b2417;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.archive__flip:hover {
+  background: rgba(64, 46, 20, 0.24);
+}
+
+.archive__flip:focus-visible {
+  outline: 2px solid #2b2417;
+  outline-offset: 2px;
+}
+
+/* Doc 4 — folha lacrada / revelada */
+.archive__locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 11rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.archive__locked-icon {
+  width: 2.6rem;
+  height: 2rem;
+  border: 2px solid rgba(64, 46, 20, 0.6);
+  border-radius: 3px;
+  position: relative;
+  opacity: 0.75;
+}
+
+.archive__locked-icon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -1.05rem;
+  width: 1.3rem;
+  height: 1.2rem;
+  border: 2px solid rgba(64, 46, 20, 0.6);
+  border-bottom: 0;
+  border-radius: 0.7rem 0.7rem 0 0;
+  transform: translateX(-50%);
+}
+
+.archive__locked-text {
+  max-width: 24rem;
+  margin: 0;
+  color: rgba(64, 46, 20, 0.9);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.archive__foot {
+  margin: 0.5rem 0 0;
+  min-height: 1em;
+  color: rgba(216, 180, 106, 0.66);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.archive__foot--unlocked {
+  color: #d8b46a;
+  text-shadow: 0 0 12px rgba(216, 180, 106, 0.35);
+}
+
 /* ============ RESPONSIVO ============ */
 @media (max-width: 720px) {
   .world {
@@ -282,6 +798,35 @@
   .dialog {
     width: 96%;
     max-height: 62%;
+  }
+
+  .archive__folder {
+    padding: 0.6rem;
+  }
+
+  .archive__stamp-line {
+    font-size: 0.4rem;
+    letter-spacing: 0.12em;
+  }
+
+  .archive__tab {
+    min-width: 4.6rem;
+    font-size: 0.52rem;
+  }
+
+  .archive__nav {
+    width: 1.6rem;
+    height: 2.4rem;
+    font-size: 1.15rem;
+  }
+
+  .archive__list-item {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .archive__hand {
+    text-align: left;
   }
 
   .dialog__text p {
@@ -301,7 +846,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .dialog,
-  .ending {
+  .ending,
+  .archive,
+  .archive__folder,
+  .archive__paper {
     animation: none;
+  }
+
+  .archive.archive--closing,
+  .archive--closing .archive__folder {
+    animation: none;
+    transition: none;
   }
 }

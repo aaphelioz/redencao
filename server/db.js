@@ -93,7 +93,7 @@ function init() {
     const achievementIds = [
       'primeiro_investimento', 'arsenal_completo', 'farmaceutico', 'medico_campo', 'carniceiro',
       'primeiro_caso', 'sem_piedade', 'roleta_russa', 'detetive_obsessivo', 'leitor_atento',
-      'sobrevivente_nato', 'speedrunner'
+      'sobrevivente_nato', 'speedrunner', 'arquivos_esquecidos'
     ];
     const stmt = db.prepare('INSERT OR IGNORE INTO achievements (id, unlocked, progress) VALUES (?, 0, 0)');
     for (const id of achievementIds) {

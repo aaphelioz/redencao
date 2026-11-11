@@ -121,6 +121,7 @@ window.REDENCAO_STORY = {
           clue: 'Lenda da Esposa do Poço',
           text: [
             'A estante guarda livros de botânica, contabilidade e um volume gasto sobre lendas da região.',
+            'Um dos livros de contabilidade tem uma página dobrada com um carimbo quase apagado: "ARQUIVO Nº 047".',
             'O livro aberto marca o capítulo "A Esposa do Poço". Nas margens, alguém escreveu: "Ela nunca saiu da casa. Eu nunca deixei."',
             'Há também um livro de poesias com dedicatória: "Para Helena, que ainda acredita que o jardim pode florescer."',
           ],
@@ -362,6 +363,75 @@ window.REDENCAO_STORY = {
           ],
         },
       ],
+    },
+  },
+
+  // Easter egg — "O Arquivo Kennedy": pasta escondida no criado-mudo do quarto do casal.
+  // Não é pista da história: não entra no total de pistas nem no NO MERCY.
+  kennedy: {
+    buttonLabel: 'Vasculhar o fundo da gaveta',
+    achievementId: 'arquivos_esquecidos',
+    overlay: {
+      eyebrow: 'ARQUIVO Nº 047',
+      stampLine1: 'DOCUMENTAÇÃO INSTITUCIONAL — ACESSO RESTRITO',
+      stampLine2: 'DATA DE ARQUIVAMENTO: 17/08/1998',
+      title: 'Colégio Estadual Presidente Kennedy',
+      line: 'Documentação institucional — acesso restrito',
+      filed: 'Data de arquivamento: 17/08/1998',
+      closeLabel: 'Fechar o arquivo',
+      progressLabel: 'Documentos examinados',
+      prevLabel: 'Documento anterior',
+      nextLabel: 'Próximo documento',
+      tabsLabel: 'Documentos do arquivo',
+      completeNote: 'Você encontrou uma conexão que deveria permanecer oculta.',
+      lockedNote: 'Esta folha está lacrada por dentro. Examine os três documentos anteriores antes de forçá-la.',
+      flipToBack: 'Virar a foto',
+      flipToFront: 'Virar a foto novamente',
+      frontCaption: 'Frente — uma turma diante do prédio do colégio. Todos olham para a câmera. Quase todos.',
+      backInscription: 'Presidente Kennedy — 1998.',
+      unlockedNote: 'Conquista desbloqueada: Arquivos Esquecidos.',
+    },
+    tabs: ['Carta', 'Relação', 'Fotografia', 'Folha avulsa'],
+    documents: {
+      carta: {
+        kind: 'Carta datilografada',
+        title: 'Carta da Direção Institucional',
+        paragraphs: [
+          'Ao responsável pelo arquivo da Mansão Albrecht,',
+          'Solicitamos novamente o esclarecimento referente aos materiais encaminhados à instituição em circunstâncias ainda não documentadas.',
+          'A direção do Colégio Estadual Presidente Kennedy não reconhece a procedência dos objetos recebidos, tampouco a identidade do responsável pelo envio.',
+          'Solicitamos que futuras correspondências sejam interrompidas.',
+          '— Direção institucional',
+        ],
+      },
+      relacao: {
+        kind: 'Relação de materiais',
+        title: 'Objetos Encaminhados à Instituição',
+        intro: 'Relação dos objetos supostamente enviados da Mansão Albrecht para o Colégio Estadual Presidente Kennedy:',
+        items: [
+          '01 caixa de fotografias.',
+          '03 livros de registros.',
+          '01 relógio de parede.',
+          '12 documentos sem identificação.',
+          '01 fotografia de turma.',
+        ],
+        annotation: 'Não deveria estar aqui.',
+        closing: 'Recebido por protocolo informal, sem remetente identificado.',
+      },
+      foto: {
+        kind: 'Fotografia de turma',
+        title: 'Presidente Kennedy — 1998',
+      },
+      nota: {
+        kind: 'Folha avulsa',
+        title: 'Sem remetente, sem data',
+        paragraphs: [
+          'Eles continuam procurando pelos registros.',
+          'Se encontrarem a fotografia, não deixem que descubram de onde ela veio.',
+          'A mansão não foi o primeiro lugar.',
+          '— Assinatura ilegível',
+        ],
+      },
     },
   },
 

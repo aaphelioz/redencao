@@ -184,6 +184,8 @@ window.RedencaoRooms = (() => {
         { texture: 'decor-armchair', x: 330, y: 262 },
         { texture: 'decor-clothes', x: 210, y: 196, solid: false },
         { texture: 'decor-cobweb-r', x: 726, y: 64, solid: false },
+        // Pasta espiando da gaveta forçada do criado-mudo (easter egg)
+        { texture: 'prop-folder', x: 246, y: 58, solid: false, depth: 90 },
       ],
     },
     jardim: {

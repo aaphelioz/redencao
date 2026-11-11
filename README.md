@@ -165,6 +165,21 @@ public/
 - A derrota ainda concede 5 moedas de consolação.
 - O saldo fica salvo no SQLite (`redencao.db`), aparece no menu e é atualizado ao voltar da partida.
 
+## Easter egg — O Arquivo Kennedy
+
+Um mistério secundário, escondido no **quarto do casal** e opcional — não altera a história principal, as pistas, o NO MERCY ou os finais.
+
+- No **Quartos**, aproxime-se do **criado-mudo** e pressione `E` (interação normal do jogo) para forçar a gaveta; o diálogo do diário de Helena traz o botão **Vasculhar o fundo da gaveta**, com uma pasta amarelada espiando por baixo do diário.
+- A pasta abre a interface própria do **Arquivo Kennedy** (`#kennedy-archive`, estilos em `world/world.css`): papel envelhecido, carimbo "ARQUIVO Nº 047" e o cabeçalho do Colégio Estadual Presidente Kennedy.
+- São **quatro documentos** navegáveis (anterior/próximo e abas), com contador "Documentos examinados: X/4":
+  1. **Carta da Direção** — a instituição pede esclarecimentos e exige que a correspondência cesse;
+  2. **Relação de materiais** — os objetos enviados (incluindo a fotografia de turma), com a anotação manuscrita *"Não deveria estar aqui."*;
+  3. **Fotografia de turma** — preto e branco procedural com um rosto riscado; **Virar a foto** revela a inscrição *"Presidente Kennedy — 1998."*;
+  4. **Folha avulsa** — só pode ser examinada depois dos três anteriores.
+- Ler o quarto documento desbloqueia a conquista secreta **Arquivos Esquecidos** ("Você encontrou uma conexão que deveria permanecer oculta."), registrada no SQLite e creditada uma única vez.
+- Uma pista sutil existe em **sala-estante**: o livro de contabilidade traz o carimbo "ARQUIVO Nº 047".
+- O progresso dos documentos persiste durante a sessão de jogo; a conquista persiste definitivamente.
+
 ## Fora de escopo
 
 - Loja com itens e compras.

@@ -306,6 +306,412 @@ window.RedencaoWorld = (() => {
     return letter;
   }
 
+  // ---------- easter egg: O Arquivo Kennedy ----------
+  // Pasta escondida no fundo da gaveta do criado-mudo do quarto do casal.
+  // Não interfere na história: progresso próprio, sem contar no HUD de pistas.
+  const kennedyDocIds = ['carta', 'relacao', 'foto', 'nota'];
+  // Progresso da sessão (persiste entre cômodos e partidas nesta sessão de jogo).
+  const kennedyProgress = { viewed: new Set(), achievementUnlocked: false };
+  let kennedyCurrent = 0;
+  let kennedyPhotoFlipped = false;
+  let archiveOpen = false;
+  let archiveLastTrigger = null;
+
+  const archiveEl = document.getElementById('kennedy-archive');
+  const archivePage = document.getElementById('archive-page');
+  const archiveTabs = document.getElementById('archive-tabs');
+  const archiveCounter = document.getElementById('archive-counter');
+  const archiveFoot = document.getElementById('archive-foot');
+  const archivePrev = document.getElementById('archive-prev');
+  const archiveNext = document.getElementById('archive-next');
+  const archiveClose = document.getElementById('archive-close');
+
+  function isKennedyDocAvailable(id) {
+    if (id !== 'nota') return true;
+    return ['carta', 'relacao', 'foto'].every((prev) => kennedyProgress.viewed.has(prev));
+  }
+
+  function openKennedyArchive(startIndex) {
+    if (!archiveEl || !story.kennedy) return;
+    if (Number.isInteger(startIndex)) kennedyCurrent = Math.min(Math.max(startIndex, 0), kennedyDocIds.length - 1);
+    archiveOpen = true;
+    archiveLastTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // O diálogo do criado-mudo continua aberto por baixo: trava o teclado do jogo.
+    setPhaserKeyboardEnabled(false);
+    showWorldPrompt(null);
+    archiveEl.hidden = false;
+    archiveEl.classList.remove('archive--closing');
+    renderKennedyArchive();
+    sfx('examine');
+    if (archiveClose) window.requestAnimationFrame(() => archiveClose.focus({ preventScroll: true }));
+  }
+
+  function closeKennedyArchive() {
+    if (!archiveEl || archiveEl.hidden || !archiveOpen) return;
+    sfx('ui');
+    const finish = () => {
+      archiveEl.hidden = true;
+      archiveEl.classList.remove('archive--closing');
+      archiveOpen = false;
+      // Só devolve o teclado ao jogo se não houver diálogo aberto por baixo.
+      setPhaserKeyboardEnabled(!state.dialogOpen);
+      const target = archiveLastTrigger && document.contains(archiveLastTrigger) ? archiveLastTrigger : null;
+      if (target) window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
+      archiveLastTrigger = null;
+    };
+    if (reducedMotion) {
+      finish();
+      return;
+    }
+    archiveEl.classList.add('archive--closing');
+    window.setTimeout(finish, 190);
+  }
+
+  function renderKennedyArchive() {
+    if (!archiveEl) return;
+    const k = story.kennedy;
+
+    renderKennedyTabs();
+    renderKennedyPage();
+
+    const n = kennedyProgress.viewed.size;
+    if (archiveCounter) archiveCounter.textContent = `${k.overlay.progressLabel}: ${n}/${kennedyDocIds.length}`;
+    if (archiveFoot) {
+      archiveFoot.textContent = n === kennedyDocIds.length ? k.overlay.completeNote : k.overlay.line;
+      archiveFoot.classList.toggle('archive__foot--unlocked', n === kennedyDocIds.length);
+    }
+    if (archivePrev) archivePrev.disabled = kennedyCurrent === 0;
+    if (archiveNext) archiveNext.disabled = kennedyCurrent === kennedyDocIds.length - 1;
+  }
+
+  function renderKennedyTabs() {
+    if (!archiveTabs) return;
+    const k = story.kennedy;
+    archiveTabs.setAttribute('aria-label', k.overlay.tabsLabel);
+    archiveTabs.replaceChildren(...k.tabs.map((label, i) => {
+      const id = kennedyDocIds[i];
+      const available = isKennedyDocAvailable(id);
+      const viewed = kennedyProgress.viewed.has(id);
+      const tab = el('button', `archive__tab${i === kennedyCurrent ? ' archive__tab--active' : ''}${available ? '' : ' archive__tab--locked'}${viewed ? ' archive__tab--done' : ''}`, available ? label : `🔒 ${label}`);
+      tab.type = 'button';
+      tab.dataset.index = String(i);
+      tab.setAttribute('aria-current', i === kennedyCurrent ? 'true' : 'false');
+      return tab;
+    }));
+  }
+
+  function renderKennedyPage() {
+    if (!archivePage) return;
+    const id = kennedyDocIds[kennedyCurrent];
+    const k = story.kennedy;
+    archivePage.replaceChildren();
+
+    if (!isKennedyDocAvailable(id)) {
+      const locked = el('div', 'archive__locked');
+      locked.append(el('div', 'archive__locked-icon'));
+      locked.append(el('p', 'archive__locked-text', k.overlay.lockedNote));
+      archivePage.append(locked);
+      return;
+    }
+
+    if (id === 'carta') {
+      archivePage.append(buildKennedyTypewriterPaper(k.documents.carta));
+    } else if (id === 'relacao') {
+      archivePage.append(buildKennedyListPaper(k.documents.relacao));
+    } else if (id === 'foto') {
+      archivePage.append(buildKennedyPhoto(k.documents.foto, k.overlay));
+    } else if (id === 'nota') {
+      archivePage.append(buildKennedyTypewriterPaper(k.documents.nota, true));
+    }
+
+    markKennedyDocViewed(id);
+  }
+
+  function buildKennedyTypewriterPaper(doc, signOff) {
+    const paper = el('article', 'archive__paper');
+    paper.append(el('p', 'archive__paper-kind', doc.kind));
+    paper.append(el('h4', 'archive__paper-title', doc.title));
+    const body = el('div', 'archive__paper-body');
+    doc.paragraphs.forEach((p) => {
+      const line = el('p', '', p);
+      if (signOff && p.startsWith('—')) {
+        line.classList.add('archive__hand');
+        line.style.fontStyle = 'italic';
+      }
+      body.append(line);
+    });
+    paper.append(body);
+    return paper;
+  }
+
+  function buildKennedyListPaper(doc) {
+    const paper = el('article', 'archive__paper');
+    paper.append(el('p', 'archive__paper-kind', doc.kind));
+    paper.append(el('h4', 'archive__paper-title', doc.title));
+    const body = el('div', 'archive__paper-body');
+    body.append(el('p', '', doc.intro));
+    const list = el('ul', 'archive__list');
+    doc.items.forEach((item, i) => {
+      const li = el('li', 'archive__list-item');
+      li.append(el('span', 'archive__list-text', item));
+      if (i === doc.items.length - 1) li.append(el('span', 'archive__hand', `“${doc.annotation}”`));
+      list.append(li);
+    });
+    body.append(list);
+    paper.append(body);
+    if (doc.closing) paper.append(el('p', 'archive__paper-note', doc.closing));
+    return paper;
+  }
+
+  function buildKennedyPhoto(doc, overlay) {
+    const wrap = el('div', 'archive__paper archive__photo');
+    wrap.append(el('p', 'archive__paper-kind', doc.kind));
+
+    const front = el('figure', 'archive__photo-frame');
+    front.hidden = kennedyPhotoFlipped;
+    const canvas = document.createElement('canvas');
+    canvas.width = 356;
+    canvas.height = 224;
+    canvas.className = 'archive__photo-canvas';
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Fotografia em preto e branco de uma turma diante do prédio do colégio. Um dos rostos foi riscado.');
+    front.append(canvas);
+    front.append(el('figcaption', 'archive__photo-caption', overlay.frontCaption));
+    drawKennedyPhoto(canvas);
+
+    const back = el('div', 'archive__photo-back');
+    back.hidden = !kennedyPhotoFlipped;
+    back.append(el('div', 'archive__photo-stamp'));
+    back.append(el('p', 'archive__photo-back-inscription', overlay.backInscription));
+
+    const flip = el('button', 'archive__flip', kennedyPhotoFlipped ? overlay.flipToFront : overlay.flipToBack);
+    flip.type = 'button';
+    flip.addEventListener('click', () => {
+      kennedyPhotoFlipped = !kennedyPhotoFlipped;
+      sfx('ui');
+      front.hidden = kennedyPhotoFlipped;
+      back.hidden = !kennedyPhotoFlipped;
+      flip.textContent = kennedyPhotoFlipped ? overlay.flipToFront : overlay.flipToBack;
+    });
+
+    wrap.append(front);
+    wrap.append(back);
+    wrap.append(flip);
+    return wrap;
+  }
+
+  // Fotografia de turma procedural (P&B, envelhecida, um rosto riscado)
+  function drawKennedyPhoto(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    let seed = 19980817;
+    const rand = () => {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    // fundo: parede do colégio, porta ao longe
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#63645f');
+    bg.addColorStop(0.55, '#41423f');
+    bg.addColorStop(1, '#242523');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(0, 44, w, 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    ctx.fillRect(w / 2 - 22, 10, 44, 46); // porta escura ao fundo
+
+    const figure = (cx, baseY, scale, tone, headTone) => {
+      ctx.fillStyle = tone;
+      ctx.beginPath();
+      ctx.moveTo(cx - 12 * scale, baseY);
+      ctx.lineTo(cx - 8.5 * scale, baseY - 15 * scale);
+      ctx.lineTo(cx + 8.5 * scale, baseY - 15 * scale);
+      ctx.lineTo(cx + 12 * scale, baseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = headTone;
+      ctx.beginPath();
+      ctx.arc(cx, baseY - 21 * scale, 6.6 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(22,20,17,0.85)';
+      ctx.beginPath();
+      ctx.arc(cx, baseY - 23.4 * scale, 6.6 * scale, Math.PI * 1.04, Math.PI * 1.96);
+      ctx.fill();
+    };
+
+    const tones = ['#1d1e1d', '#252624', '#2d2c29', '#1a1b1c'];
+    const heads = ['#b9b5a8', '#a8a496', '#c6c2b4', '#98948a'];
+
+    // professor ao fundo, ao centro
+    figure(w / 2, 78, 1.28, '#191a19', '#b0aca0');
+    ctx.fillStyle = 'rgba(10,10,10,0.9)';
+    ctx.fillRect(w / 2 - 1.5, 56, 3, 12); // gravata
+
+    // três fileiras de alunos
+    const rows = [
+      { baseY: 116, count: 8, spread: 34, scale: 0.86 },
+      { baseY: 158, count: 9, spread: 35, scale: 0.98 },
+      { baseY: 208, count: 8, spread: 40, scale: 1.14 },
+    ];
+    const scribbledRow = 1;   // fileira do meio
+    const scribbledIndex = 4; // quarto aluno a partir da esquerda
+    let scribbled = null;
+
+    rows.forEach((row, rowIndex) => {
+      const startX = w / 2 - ((row.count - 1) * row.spread) / 2;
+      for (let i = 0; i < row.count; i++) {
+        const cx = startX + i * row.spread + (rand() - 0.5) * 5;
+        const tone = tones[Math.floor(rand() * tones.length)];
+        const head = heads[Math.floor(rand() * heads.length)];
+        figure(cx, row.baseY, row.scale * (0.92 + rand() * 0.18), tone, head);
+        if (rowIndex === scribbledRow && i === scribbledIndex) {
+          scribbled = { x: cx, y: row.baseY - 21 * row.scale, r: 6.6 * row.scale };
+        }
+      }
+    });
+
+    // rosto riscado: rabiscos escuros por cima da identidade
+    if (scribbled) {
+      ctx.strokeStyle = 'rgba(10,8,6,0.92)';
+      ctx.lineWidth = 1.7;
+      ctx.lineCap = 'round';
+      for (let s = 0; s < 5; s++) {
+        const yy = scribbled.y - scribbled.r + (s + 0.5) * ((scribbled.r * 2) / 5);
+        ctx.beginPath();
+        ctx.moveTo(scribbled.x - scribbled.r - 2, yy + (rand() - 0.5) * 3);
+        for (let x = scribbled.x - scribbled.r; x <= scribbled.x + scribbled.r + 2; x += 3) {
+          ctx.lineTo(x, yy + (rand() - 0.5) * 4.5);
+        }
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.ellipse(scribbled.x, scribbled.y, scribbled.r + 3, scribbled.r + 2, -0.15, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // granulação, riscos de revelação e vinheta
+    for (let i = 0; i < 1300; i++) {
+      const alpha = 0.04 + rand() * 0.09;
+      ctx.fillStyle = rand() < 0.5 ? `rgba(0,0,0,${alpha})` : `rgba(255,255,255,${alpha * 0.8})`;
+      ctx.fillRect(Math.floor(rand() * w), Math.floor(rand() * h), 1, 1);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fillRect(Math.floor(w * 0.3), 0, 1, h);
+    ctx.fillRect(Math.floor(w * 0.72), 0, 1, h);
+    const vignette = ctx.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, w * 0.72);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.46)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function markKennedyDocViewed(id) {
+    if (kennedyProgress.viewed.has(id)) return;
+    kennedyProgress.viewed.add(id);
+    renderKennedyTabs();
+
+    if (kennedyProgress.viewed.size === kennedyDocIds.length && !kennedyProgress.achievementUnlocked) {
+      kennedyProgress.achievementUnlocked = true;
+      unlockKennedyAchievement();
+    }
+  }
+
+  async function unlockKennedyAchievement() {
+    const k = story.kennedy;
+    let unlocked = false;
+    let rewardAmount = 0;
+    try {
+      if (typeof api !== 'undefined' && api && typeof api.unlockAchievement === 'function') {
+        const result = await api.unlockAchievement(k.achievementId);
+        if (result && result.success) {
+          unlocked = true;
+          if (result.reward && result.reward.amount) {
+            rewardAmount = result.reward.amount;
+            if (state) state.runCoins += rewardAmount;
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to unlock achievement', k.achievementId, e);
+      kennedyProgress.achievementUnlocked = false; // permite nova tentativa em outra leitura
+      return;
+    }
+    if (unlocked && archiveFoot) {
+      archiveFoot.textContent = rewardAmount > 0
+        ? `${k.overlay.unlockedNote} (+${rewardAmount} moedas)`
+        : k.overlay.unlockedNote;
+      archiveFoot.classList.add('archive__foot--unlocked');
+    }
+    renderKennedyCounterAfterUnlock();
+  }
+
+  function renderKennedyCounterAfterUnlock() {
+    const n = kennedyProgress.viewed.size;
+    if (archiveCounter) archiveCounter.textContent = `${story.kennedy.overlay.progressLabel}: ${n}/${kennedyDocIds.length}`;
+  }
+
+  function kennedyTrapFocus(event) {
+    if (!archiveEl) return;
+    const focusable = archiveEl.querySelectorAll('button:not(:disabled), [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  if (archiveEl) {
+    const k = story.kennedy;
+    if (k) {
+      const stampNo = archiveEl.querySelector('.archive__stamp-no');
+      const stampLines = archiveEl.querySelectorAll('.archive__stamp-line');
+      const title = archiveEl.querySelector('.archive__title');
+      if (stampNo) stampNo.textContent = k.overlay.eyebrow;
+      if (stampLines[0]) stampLines[0].textContent = k.overlay.stampLine1;
+      if (stampLines[1]) stampLines[1].textContent = k.overlay.stampLine2;
+      if (title) title.textContent = k.overlay.title;
+      if (archiveClose) archiveClose.setAttribute('aria-label', k.overlay.closeLabel);
+      if (archivePrev) archivePrev.setAttribute('aria-label', k.overlay.prevLabel);
+      if (archiveNext) archiveNext.setAttribute('aria-label', k.overlay.nextLabel);
+    }
+    archiveClose.addEventListener('click', closeKennedyArchive);
+    archiveEl.querySelector('[data-archive-close]').addEventListener('click', closeKennedyArchive);
+    archivePrev.addEventListener('click', () => {
+      if (kennedyCurrent === 0) return;
+      kennedyCurrent -= 1;
+      sfx('ui');
+      renderKennedyArchive();
+    });
+    archiveNext.addEventListener('click', () => {
+      if (kennedyCurrent === kennedyDocIds.length - 1) return;
+      kennedyCurrent += 1;
+      sfx('ui');
+      renderKennedyArchive();
+    });
+    archiveTabs.addEventListener('click', (event) => {
+      const tab = event.target.closest('.archive__tab');
+      if (!tab || !archiveTabs.contains(tab)) return;
+      const index = Number(tab.dataset.index);
+      if (!Number.isInteger(index) || index === kennedyCurrent) return;
+      kennedyCurrent = index;
+      sfx('ui');
+      renderKennedyArchive();
+    });
+    archiveEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Tab') kennedyTrapFocus(event);
+    });
+  }
+
   // ---------- pistas / encontros ----------
   function maybeQueueEncounter() {
     const cfg = getModeConfig();
@@ -369,6 +775,12 @@ window.RedencaoWorld = (() => {
     updateProgress();
     sfx('examine');
 
+    const actions = [{ label: 'Voltar ao cômodo', variant: 'ghost' }];
+    // Easter egg: algo espreita no fundo da gaveta do criado-mudo
+    if (interaction.id === 'quartos-criado-mudo' && story.kennedy) {
+      actions.unshift({ label: story.kennedy.buttonLabel, variant: 'primary', onClick: () => openKennedyArchive(0) });
+    }
+
     openDialog({
       eyebrow: `Investigação — ${room.name}`,
       title: room.name,
@@ -376,7 +788,7 @@ window.RedencaoWorld = (() => {
       paragraphs,
       content,
       clue: interaction.clue,
-      actions: [{ label: 'Voltar ao cômodo', variant: 'ghost' }],
+      actions,
       onClose: afterInteractionCloses,
     });
   }
@@ -749,6 +1161,14 @@ window.RedencaoWorld = (() => {
 
   // Atalho universal: Enter/Espaço ativa o primeiro botão do diálogo visível
   document.addEventListener('keydown', (event) => {
+    // Arquivo Kennedy aberto: Esc fecha; nada vaza para o diálogo por baixo
+    if (archiveOpen) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeKennedyArchive();
+      }
+      return;
+    }
     if (!dialogEl || dialogEl.hidden) return;
     const button = dialogActions.querySelector('button');
     if (!button) return; // diálogos sem botões são formulários — não interferir
