@@ -1,0 +1,6 @@
+node_modules/
+redencao.db
+redencao.db-shm
+redencao.db-wal
+*.log
+.DS_Store

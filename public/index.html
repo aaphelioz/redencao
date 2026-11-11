@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Redenção — um jogo de investigação noir na Mansão Albrecht.">
+  <meta name="theme-color" content="#04070b">
+  <title>Redenção</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23070d14'/%3E%3Cpath d='M9 8h8a5 5 0 0 1 0 10h-8zM9 18h7l6 6h-7z' fill='%237fa8c9'/%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/press-start-2p-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="world/world.css?v=2">
+  <script src="audio.js?v=2" defer></script>
+  <script src="story.js?v=2" defer></script>
+  <script src="api.js?v=2" defer></script>
+  <script src="vendor/phaser.min.js?v=2" defer></script>
+  <script src="world/textures.js?v=2" defer></script>
+  <script src="world/rooms.js?v=2" defer></script>
+  <script src="world/scenes.js?v=2" defer></script>
+  <script src="world/combat.js?v=3" defer></script>
+  <script src="world/main.js?v=3" defer></script>
+  <script src="app.js?v=2" defer></script>
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true">
+    <div class="mansion"></div>
+    <div class="mansion-shade"></div>
+    <div class="fog fog--one"></div>
+    <div class="fog fog--two"></div>
+    <div class="fog fog--three"></div>
+    <canvas class="rain" id="rain"></canvas>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <main class="menu" id="main-menu">
+    <h1 class="menu__title">Redenção</h1>
+
+    <nav class="menu__nav" aria-label="Menu principal">
+      <button class="btn" type="button" data-action="play">Jogar</button>
+      <button class="btn" type="button" data-action="options">Opções</button>
+      <button class="btn" type="button" data-action="store">Loja</button>
+      <button class="btn" type="button" data-action="achievements">Conquistas</button>
+      <button class="btn" type="button" data-action="exit">Sair</button>
+    </nav>
+
+    <p class="menu__status" id="menu-status" role="status" aria-live="polite"></p>
+    <p class="menu__coins" id="menu-coins" aria-live="polite">💰 —</p>
+  </main>
+
+  <dialog class="panel panel--mode" id="panel-mode" aria-labelledby="mode-title">
+    <div class="panel__inner">
+      <header class="panel__header">
+        <h2 class="panel__title" id="mode-title">Escolha o Modo</h2>
+        <button class="panel__close" type="button" data-close aria-label="Fechar seleção de modo">×</button>
+      </header>
+      <div class="panel__body panel__body--mode">
+        <p class="panel__note" id="mode-desc">Cada modo oferece uma experiência diferente.</p>
+        
+        <div class="mode-grid" role="group" aria-label="Modos de jogo">
+          <button class="mode-card" type="button" data-mode="standard" aria-describedby="mode-standard-desc">
+            <div class="mode-card__icon" aria-hidden="true">📋</div>
+            <h3 class="mode-card__title">STANDARD</h3>
+            <p class="mode-card__subtitle">A experiência original</p>
+            <p class="mode-card__desc" id="mode-standard-desc">A experiência original.</p>
+            <span class="mode-card__badge">Normal</span>
+          </button>
+
+          <button class="mode-card mode-card--danger" type="button" data-mode="no-mercy" aria-describedby="mode-mercy-desc">
+            <div class="mode-card__icon" aria-hidden="true">💀</div>
+            <h3 class="mode-card__title">NO MERCY</h3>
+            <p class="mode-card__subtitle">Para quem busca desafio real</p>
+            <p class="mode-card__desc" id="mode-mercy-desc">A casa não terá piedade.</p>
+            <span class="mode-card__badge badge--danger">Difícil</span>
+          </button>
+
+          <button class="mode-card mode-card--surprise" type="button" data-mode="surprise" aria-describedby="mode-surprise-desc">
+            <div class="mode-card__icon" aria-hidden="true">🎲</div>
+            <h3 class="mode-card__title">ME SURPREENDA</h3>
+            <p class="mode-card__subtitle">O destino decide por você</p>
+            <p class="mode-card__desc" id="mode-surprise-desc">Deixe o destino escolher.</p>
+            <span class="mode-card__badge badge--surprise">Aleatório</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="panel" id="panel-mode-result" aria-labelledby="mode-result-title">
+    <div class="panel__inner panel__inner--center">
+      <header class="panel__header">
+        <h2 class="panel__title" id="mode-result-title">O Destino Decidiu</h2>
+      </header>
+      <div class="panel__body panel__body--center">
+        <div class="mode-result__icon" id="mode-result-icon" aria-hidden="true"></div>
+        <h3 class="mode-result__mode" id="mode-result-mode"></h3>
+        <p class="mode-result__desc" id="mode-result-desc"></p>
+        <button class="btn btn--primary" type="button" data-mode-confirm>Começar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <section class="game" id="game" aria-labelledby="game-chapter" hidden>
+    <header class="game__bar">
+      <button class="game__menu" type="button" data-game-menu>Menu</button>
+      <p class="game__chapter" id="game-chapter">Capítulo I — A Mansão Albrecht</p>
+      <p class="game__progress" id="game-progress">Pistas 0 / —</p>
+    </header>
+    <div class="world" id="world">
+      <div class="world__canvas" id="world-canvas" aria-label="Mansão Albrecht — mundo explorável"></div>
+      <p class="world__prompt" id="world-prompt" hidden></p>
+
+      <div class="dialog" id="dialog" role="dialog" aria-modal="false" aria-labelledby="dialog-title" hidden>
+        <div class="dialog__inner">
+          <p class="dialog__eyebrow" id="dialog-eyebrow"></p>
+          <h3 class="dialog__title" id="dialog-title"></h3>
+          <p class="dialog__subtitle" id="dialog-subtitle" hidden></p>
+          <div class="dialog__text" id="dialog-text"></div>
+          <div class="dialog__content" id="dialog-content" hidden></div>
+          <div class="dialog__actions" id="dialog-actions"></div>
+        </div>
+      </div>
+
+      <div class="combat-dock" id="combat-dock" hidden>
+        <div class="combat-dock__hud">
+          <div id="combat-player"></div>
+          <div id="combat-enemies"></div>
+        </div>
+        <p class="combat-dock__turn" id="combat-turn">Turno 1</p>
+        <div class="combat-dock__log" id="combat-log" aria-live="polite"></div>
+        <div class="combat-dock__actions" id="combat-actions"></div>
+      </div>
+
+      <div class="ending" id="ending" hidden></div>
+    </div>
+  </section>
+
+  <dialog class="panel" id="panel-options" aria-labelledby="options-title">
+    <div class="panel__inner">
+      <header class="panel__header">
+        <h2 class="panel__title" id="options-title">Opções</h2>
+        <button class="panel__close" type="button" data-close aria-label="Fechar opções">×</button>
+      </header>
+      <div class="panel__body">
+        <div class="control">
+          <label for="master-volume">Volume principal</label>
+          <output id="master-value" for="master-volume">70%</output>
+          <input type="range" id="master-volume" min="0" max="100" step="1" value="70">
+        </div>
+        <div class="control">
+          <label for="ambient-volume">Volume ambiente</label>
+          <output id="ambient-value" for="ambient-volume">60%</output>
+          <input type="range" id="ambient-volume" min="0" max="100" step="1" value="60">
+        </div>
+        <p class="panel__note">As preferências ficam salvas neste navegador.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="panel" id="panel-store" aria-labelledby="store-title">
+    <div class="panel__inner">
+      <header class="panel__header">
+        <h2 class="panel__title" id="store-title">Loja</h2>
+        <button class="panel__close" type="button" data-close aria-label="Fechar loja">×</button>
+      </header>
+      <div class="panel__body panel__body--center">
+        <p class="panel__empty">A loja ainda está fechada.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="panel panel--full" id="panel-achievements" aria-labelledby="achievements-title">
+    <div class="panel__inner">
+      <header class="panel__header">
+        <h2 class="panel__title" id="achievements-title">Conquistas</h2>
+        <button class="panel__close" type="button" data-close aria-label="Fechar conquistas">×</button>
+      </header>
+      <div class="panel__body">
+        <p class="achievements__count" id="achievements-count">0 / 12</p>
+        <ul class="medals" id="medals" aria-label="Conquistas bloqueadas"></ul>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="panel" id="panel-exit" aria-labelledby="exit-title">
+    <div class="panel__inner">
+      <header class="panel__header">
+        <h2 class="panel__title" id="exit-title">Até a próxima</h2>
+        <button class="panel__close" type="button" data-close aria-label="Fechar tela de saída">×</button>
+      </header>
+      <div class="panel__body panel__body--center">
+        <p class="panel__empty">A cidade fica esperando.</p>
+        <p class="panel__note">O navegador não permitiu fechar a aba automaticamente. Feche esta aba quando quiser.</p>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

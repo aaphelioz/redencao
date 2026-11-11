@@ -1,0 +1,375 @@
+programa {
+  inclua biblioteca Util --> u
+
+  funcao inicio() {
+    caracter tecla = ' '
+    caracter sala = ' '
+    caracter acao = ' '
+    cadeia senha = ""
+    caracter tentar = ' '
+    caracter escolha_combate = ' '
+    inteiro acertos_jogador = 0
+    inteiro acertos_inimigo = 0
+    inteiro numero = 0
+
+    // Controle de locais já visitados
+    logico visitou_sala = falso
+    logico visitou_cozinha = falso
+    logico visitou_banheiro = falso
+    logico visitou_quartos = falso
+    logico jogo_acabou = falso
+
+    // ========== TELA INICIAL ==========
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡤⣶⣾⡉⣩⣲⣶⣶⣦⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠗⠘⠂⠂⣒⡒⣒⢒⣖⠚⠯⠭⠽⣛⣒⠦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⣀⠀⢀⠄⠀⠀⠁⠕⡘⠛⠿⠷⠦⢤⣉⡑⠢⢍⡛⠶⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠟⠚⣹⡏⠉⠑⠒⢒⠟⠫⠭⠷⣾⣯⡥⣀⣨⠉⠑⠲⢬⣑⠢⠍⢦⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⢀⣠⣤⣴⣖⣲⡖⣿⠭⡭⠉⠿⠷⢒⣒⣦⡾⣄⣀⠀⠀⠀⠈⠉⠙⣛⡶⢤⣀⣀⠉⠓⠠⣸⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⢸⣇⢿⡭⢾⢓⡺⢏⣉⣭⡩⠭⠯⢅⣭⣉⣉⣛⡣⠶⣿⣙⡲⠧⣄⣀⠀⢀⠀⠈⠙⠯⣀⠀⡇⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠈⠙⢮⣆⡀⠐⡊⠂⠉⣶⠛⠚⠋⠉⠛⠓⠚⠓⠣⠭⢝⣒⠯⠵⣒⣌⣙⠒⠤⣀⡀⠀⠈⢹⠁⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠈⠛⠦⣍⡂⢠⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠒⠢⠭⣟⡷⢦⣤⡉⢒⡤⣼⡀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⣀⣤⣤⣯⣿⣄⡀⠀⠀⠀⡀⢀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠷⢬⡑⠻⢷⡯⡲⢄⡀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠸⢿⡷⣿⣥⣿⣽⣿⣦⣀⣼⠿⠶⢶⡶⣤⣀⠀⠀⠀⠀⠀⠀⠀⣀⣷⣤⣠⣬⣷⠀⠙⢎⠑⣝⢢⡄⠀ Redenção \n")
+    escreva("⠀⠀⠀⠀⠀⠀⠸⣧⠘⣬⠋⠹⣵⡏⢻⣇⠀⠐⢻⣿⣛⢽⣷⡤⣶⡶⠖⠚⠛⡿⠋⠉⠉⠉⢹⣧⡀⢨⡇⣗⠀⢻⡆ Capitulo I \n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠙⢷⣿⣀⣰⣿⠀⠀⢻⣆⠀⢌⠉⠀⠀⣿⡈⠉⠀⠀⠀⠀⠀⠀⠰⡇⠀⣼⡿⠦⠬⠶⠿⠶⠿⠏ Digite W e clique ENTER para iniciar\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⠀⢀⠆⠀⠀⠀⠹⡷⠦⠤⠤⠾⠃⠁⠀⠀⠀⠀⠀⠀⠀⡇⣨⢰⡟⠀⠀⠀⠀⠀ Antes de jogar lembre-se, este é um jogo que envolve decisões sábias e muita sorte, logo tome cuidado.\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⡆⠸⣄⣀⡴⠶⠦⠷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⠺⠋⢡⠞⠀⠀⠀⠀⠀⠀⠀⠀ Talvez o destino não lhe concessa a oportunidade de redenção.\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡆⡀⢠⠀⡀⠀⠀⠸⡄⠀⠰⠀⠀⠀⠀⠀⠀⣸⡁⠀⡰⢻⡶⣄⠀⠀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⡗⢿⣛⣯⣵⣦⣄⡀⢳⠀⠀⠀⠀⡀⠀⢀⣬⠃⡑⠊⠁⢸⡿⡌⢳⡀⠀⠀⠀⠀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡀⠀⠀⠉⠀⠀⠀⣀⡈⠳⡀⠀⢀⠇⣀⡾⠃⠀⠇⠀⢀⠜⠀⢧⠀⠙⢦⣀⡀⠀⠀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠈⠀⠇⣠⠿⠊⠀⠀⠀⠠⠀⡰⠃⠀⠀⣼⠀⠀⠀⠈⢯⠙⠦⣀\n")
+    escreva("⠀⠀⠀⠀⠀⠀⠀⠀⣀⡤⠖⠳⢄⣀⣀⠀⠀⣀⣀⣀⡤⠞⠁⠀⠀⠀⠀⠀⢀⠞⠁⠀⠀⢠⠇⠀⠀⠀⠀⢸⡆⠀⠀\n")
+    escreva("⠀⠀⠀⠀⣀⠤⠒⠋⠁⠀⠀⠀⠀⡼⠋⡉⠫⣉⠉⠲⢄⡀⠀⠠⡀⠀⢀⡴⠋⠀⠀⠀⢀⠎⠀⠀⠀⠀⠀⠀⣇⠀⠀\n")
+    escreva("⢀⣠⠖⠋⠀⠀⠀⠀⠀⠀⠀⢀⡞⠀⡼⠉⠳⠮⣕⢄⡀⠙⣆⣀⡴⠞⠁⠀⠀⠀⠀⢀⠎⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀\n")
+    escreva("⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⢠⠞⠀⢰⡇⢀⣀⡀⠀⢉⡿⣿⠿⠓⠒⠉⠉⠉⢳⠀⢠⠟⠀⠀⠀⠀⠀⠀⠀⢀⡟⠀⠀\n")
+    escreva("⠸⡇⠀⠀⠀⠀⠀⠀⠀⣰⠋⠀⠀⠨⢿⠀⠈⠩⠭⠽⣀⣿⣒⡒⠒⠉⠁⠀⢸⢀⡎⠀⠀⠀⠀⠀⠀⠀⠀⢹⠀⠀⠀\n")
+    escreva("⠈⡇⠀⠀⠀⠀⠀⠀⡰⠃⠀⠀⠀⠀⢸⡄⠀⠀⢀⣴⠏⠈⠑⢌⠑⢦⣀⠀⢨⡼⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠁⠀⠀\n")
+    escreva("⠀⣧⠀⠀⠀⠀⠀⠺⣅⠀⠀⠀⠀⠀⢸⠧⢴⠞⣽⡞⠀⠀⠀⢠⠳⣄⠀⠀⣸⠃⠀⠀⠀⠀⠀⠀⠀⠀⢸⡿⠀⠀⠀\n")
+
+    enquanto (tecla != 'w' e tecla != 'W') {
+      leia(tecla)
+    }
+    limpa()
+
+    // ========== INTRODUÇÃO ==========
+    tecla = ' '
+    escreva("Douglas Silva, um senhor de 60 anos prestes a se aposentar, aceita uma missão do delegado local: investigar uma antiga mansão.\n")
+    escreva("Digite W e aperte ENTER para continuar.\n")
+    enquanto (tecla != 'w' e tecla != 'W') {
+      leia(tecla)
+    }
+    limpa()
+
+    tecla = ' '
+    escreva("A mansão era famosa pelos boatos de assombrações e desaparecimentos. Ninguém entrava ali há anos.\n")
+    escreva("Digite W e aperte ENTER para continuar.\n")
+    enquanto (tecla != 'w' e tecla != 'W') {
+      leia(tecla)
+    }
+    limpa()
+
+    tecla = ' '
+    escreva("Enquanto dirigia até o local, Douglas sentiu uma enxaqueca forte, quase incapacitante. Algo naquela casa já o rejeitava.\n")
+    escreva("Digite W e aperte ENTER para continuar.\n")
+    enquanto (tecla != 'w' e tecla != 'W') {
+      leia(tecla)
+    }
+    limpa()
+
+    tecla = ' '
+    escreva("Ao chegar, o policial abriu a porta com cautela, charuto entre os dedos.\n")
+    escreva("Parabéns, jogador. Você chegou à sua primeira escolha. Seja cuidadoso... o futuro pode não ter piedade.\n")
+    escreva("Digite W e aperte ENTER para ver os locais disponíveis.\n")
+    enquanto (tecla != 'w' e tecla != 'W') {
+      leia(tecla)
+    }
+    limpa()
+
+    // ========== LOOP PRINCIPAL DE EXPLORAÇÃO ==========
+    enquanto (jogo_acabou == falso) {
+      escreva("========== MANSÃO ALBRECHT ==========\n\n")
+      escreva("Locais disponíveis:\n")
+
+      se (visitou_sala == falso) {
+        escreva("1. Sala de estar\n")
+      }
+      se (visitou_cozinha == falso) {
+        escreva("2. Cozinha\n")
+      }
+      se (visitou_banheiro == falso) {
+        escreva("3. Banheiros\n")
+      }
+      se (visitou_quartos == falso) {
+        escreva("4. Quartos\n")
+      }
+      // Jardim sempre aparece
+      escreva("5. Jardim de folhas secas\n")
+
+      escreva("\nDigite o número do local que deseja explorar: ")
+      leia(sala)
+      limpa()
+
+      escolha (sala) {
+        caso '1':
+          se (visitou_sala == verdadeiro) {
+            escreva("Você já explorou a sala de estar.\n")
+            escreva("Pressione ENTER para voltar.\n")
+            leia(tecla)
+            limpa()
+          }
+          senao {
+            visitou_sala = verdadeiro
+            escreva("Quando Douglas entra na sala, as madeiras rangem como se gritassem de agonia.\n")
+            escreva("Apesar da bagunça do tempo, a sala ainda guarda uma organização estranha.\n")
+            escreva("No canto, duas coisas chamam atenção: papéis espalhados sobre a escrivaninha e um quadro antigo na parede.\n\n")
+            escreva("O que você deseja fazer?\n")
+            escreva("1. Investigar os papéis da escrivaninha\n")
+            escreva("2. Olhar atrás do quadro antigo\n")
+            escreva("Escolha: ")
+            leia(acao)
+            limpa()
+
+            escolha (acao) {
+              caso '1':
+                escreva("Helena não está mais aqui. As pessoas já notaram o sumiço dela.\n")
+                escreva("Inventei que ela viajou às pressas para um treinamento em outra cidade...\n")
+                escreva("Aquela discussão na cozinha passou dos limites e acabou da pior forma.\n")
+                escreva("Passei a noite limpando tudo. Peguei os documentos dela e joguei no fundo\n")
+                escreva("do velho poço desativado, lá no jardim, sob as folhas secas.\n")
+                escreva("Espero que ninguém vasculhe aquele lugar. Minha vida acabou se descobrirem.\n")
+                pare
+              caso '2':
+                escreva("Atrás do quadro há um cofre trancado.\n")
+                escreva("Você pode tentar descobrir a senha.\n\n")
+
+                enquanto (verdadeiro) {
+                  escreva("Deseja tentar a senha do cofre?\n")
+                  escreva("(Dica: Quem trancou o cofre sentia tanta falta da esposa que transformou o nome dela em senha...)\n")
+                  escreva("1. Sim, tentar a senha\n")
+                  escreva("2. Não, desistir\n")
+                  escreva("Escolha: ")
+                  leia(tentar)
+                  limpa()
+
+                  se (tentar == '2') {
+                    escreva("Você decide não tentar a senha e se afasta do cofre.\n")
+                    pare
+                  }
+                  senao se (tentar == '1') {
+                    escreva("Digite a senha: ")
+                    leia(senha)
+                    limpa()
+
+                    se (senha == "helena" ou senha == "Helena" ou senha == "HELENA") {
+                      escreva("*O cofre emite um clique metálico*\n")
+                      escreva("O cofre se abre. Dentro há documentos antigos e uma fotografia amarelada de uma mulher.\n")
+                      escreva("Talvez pertença ao marido.\n")
+                      pare
+                    }
+                    senao {
+                      escreva("Senha incorreta. O cofre permanece fechado.\n")
+                      escreva("Tente novamente ou desista.\n\n")
+                    }
+                  }
+                  senao {
+                    escreva("Opção inválida.\n\n")
+                  }
+                }
+                pare
+              caso contrario:
+                escreva("Você hesita e acaba não fazendo nada na sala.\n")
+                pare
+            }
+            escreva("\nPressione ENTER para voltar aos locais.\n")
+            leia(tecla)
+            limpa()
+          }
+          pare
+
+        caso '2':
+          se (visitou_cozinha == verdadeiro) {
+            escreva("Você já explorou a cozinha.\n")
+            escreva("Pressione ENTER para voltar.\n")
+            leia(tecla)
+            limpa()
+          }
+          senao {
+            visitou_cozinha = verdadeiro
+            escreva("Você entra na cozinha. O cheiro de podridão é quase insuportável.\n")
+            escreva("O que deseja fazer?\n")
+            escreva("1. Abrir a geladeira enferrujada\n")
+            escreva("2. Vasculhar as gavetas do armário\n")
+            escreva("Escolha: ")
+            leia(acao)
+            limpa()
+
+            escolha (acao) {
+              caso '1':
+                escreva("Ao abrir a geladeira, um gás estranho escapa. Douglas tosse forte e a enxaqueca piora.\n")
+                pare
+              caso '2':
+                escreva("Nas gavetas você encontra uma chave enferrujada. Pode ser útil mais tarde.\n")
+                pare
+              caso contrario:
+                escreva("O cheiro ruim te paralisa por alguns instantes.\n")
+                pare
+            }
+            escreva("\nPressione ENTER para voltar aos locais.\n")
+            leia(tecla)
+            limpa()
+          }
+          pare
+
+        caso '3':
+          se (visitou_banheiro == verdadeiro) {
+            escreva("Você já explorou o banheiro.\n")
+            escreva("Pressione ENTER para voltar.\n")
+            leia(tecla)
+            limpa()
+          }
+          senao {
+            visitou_banheiro = verdadeiro
+            escreva("Você entra no banheiro. O espelho está quebrado e há marcas estranhas nas paredes.\n")
+            escreva("Nada mais parece útil aqui.\n")
+            escreva("\nPressione ENTER para voltar aos locais.\n")
+            leia(tecla)
+            limpa()
+          }
+          pare
+
+        caso '4':
+          se (visitou_quartos == verdadeiro) {
+            escreva("Você já explorou os quartos.\n")
+            escreva("Pressione ENTER para voltar.\n")
+            leia(tecla)
+            limpa()
+          }
+          senao {
+            visitou_quartos = verdadeiro
+            escreva("Chegando ao quarto do casal, quase não há nada. Nem uma foto. Parece que tudo foi levado às pressas.\n")
+            escreva("Ainda assim, o cheiro de podridão que consome a casa é impossível de ignorar.\n")
+            escreva("\nPressione ENTER para voltar aos locais.\n")
+            leia(tecla)
+            limpa()
+          }
+          pare
+
+        caso '5':
+          escreva("Você vai até o Jardim de folhas secas. O vento está forte e um barulho vem do poço...\n")
+          escreva("O que deseja fazer?\n")
+          escreva("1. Investigar o velho poço desativado\n")
+          escreva("2. Apenas olhar ao redor e voltar\n")
+          escreva("Escolha: ")
+          leia(acao)
+          limpa()
+
+          escolha (acao) {
+            caso '1':
+              escreva("Douglas se aproxima do poço com cautela. As folhas secas se acumulam ao redor da borda rachada.\n")
+              escreva("O cheiro de umidade e algo podre sobe das profundezas.\n")
+              escreva("De repente, uma mão gosmenta e pálida emerge do poço, agarrando a borda!\n")
+              escreva("Uma figura feminina sobe de forma grotesca. É Helena... ou o que restou dela.\n")
+              escreva("Sua pele está coberta de limo e terra, o cabelo grudado no rosto, e os olhos brilham com ódio puro.\n")
+              escreva("Ela emite um grito gutural, sedenta por vingança.\n\n")
+              escreva("========== COMBATE CONTRA HELENA ==========\n")
+              escreva("Você precisa acertar 5 tiros para derrotá-la.\n")
+              escreva("Se ela te atingir 5 vezes... você morre.\n\n")
+
+              enquanto (acertos_jogador < 5 e acertos_inimigo < 5) {
+                escreva("----------------------------------------\n")
+                escreva("Seus acertos: ", acertos_jogador, "/5\n")
+                escreva("Acertos de Helena: ", acertos_inimigo, "/5\n")
+                escreva("----------------------------------------\n")
+                escreva("O que você faz?\n")
+                escreva("1. Atirar com a pistola\n")
+                escreva("2. Esquivar do ataque\n")
+                escreva("Escolha: ")
+                leia(escolha_combate)
+                limpa()
+
+                numero = u.sorteia(0, 20)
+
+                se (escolha_combate == '1') {
+                  se (numero > 15) {
+                    acertos_jogador = acertos_jogador + 1
+                    escreva("Você dispara! O tiro acerta em cheio o corpo podre de Helena!\n")
+                    escreva("Ela recua gritando de dor... mas continua de pé.\n")
+                  }
+                  senao {
+                    acertos_inimigo = acertos_inimigo + 1
+                    escreva("Você erra o tiro! Helena aproveita a abertura e avança.\n")
+                    escreva("Ela te arranha com as unhas sujas e gosmentas. A dor é intensa!\n")
+                  }
+                }
+                senao se (escolha_combate == '2') {
+                  se (numero > 15) {
+                    escreva("Você se joga para o lado a tempo! Helena passa raspando.\n")
+                    escreva("Você consegue se reerguer rapidamente.\n")
+                  }
+                  senao {
+                    acertos_inimigo = acertos_inimigo + 1
+                    escreva("Você tenta esquivar, mas é lento demais!\n")
+                    escreva("Helena te empurra com força e te morde o ombro. O gosto metálico de sangue enche sua boca.\n")
+                  }
+                }
+                senao {
+                  escreva("Você hesita... Helena não hesita.\n")
+                  acertos_inimigo = acertos_inimigo + 1
+                  escreva("Ela te atinge em cheio com um golpe pesado!\n")
+                }
+
+                escreva("\n(Pressione ENTER para continuar o combate)\n")
+                leia(tecla)
+                limpa()
+              }
+
+              se (acertos_jogador >= 5) {
+                escreva("========== VITÓRIA ==========\n")
+                escreva("Com o quinto tiro, Helena finalmente cai de joelhos.\n")
+                escreva("Seu corpo treme, o ódio se esvai dos olhos, e ela desaba no chão coberto de folhas.\n")
+                escreva("Douglas, ofegante e ferido, observa o corpo imóvel.\n")
+                escreva("A vingança de Helena chegou ao fim... mas a verdade sobre a mansão ainda permanece.\n\n")
+                escreva("Anos depois, os desaparecimentos realmente pararam...\n")
+                escreva("Douglas, por dentro, não culpa aquela mulher por tudo o que fez. Ninguém culpa.\n")
+                escreva("O caso da 'Esposa do Poço' permanece famoso até os dias de hoje...\n")
+                escreva("O paradeiro do marido continua desconhecido e omitido.\n")
+                escreva("FIM.\n")
+              }
+              senao {
+                escreva("========== DERROTA ==========\n")
+                escreva("Helena te derruba no chão. Suas mãos gosmentas apertam seu pescoço com força sobrenatural.\n")
+                escreva("A visão de Douglas escurece enquanto a criatura emite um riso distorcido e molhado.\n")
+                escreva("Sua última sensação é o cheiro de terra úmida e morte...\n")
+                escreva("Douglas Silva não conseguiu se salvar dessa vez.\n")
+                escreva("FIM.\n")
+              }
+              jogo_acabou = verdadeiro
+              pare
+
+            caso '2':
+              escreva("Você caminha pelo jardim. As folhas secas crepitam sob os pés.\n")
+              escreva("Nada de muito interessante além do vento frio e do silêncio pesado da mansão.\n")
+              escreva("\nPressione ENTER para voltar aos locais.\n")
+              leia(tecla)
+              limpa()
+              pare
+
+            caso contrario:
+              escreva("Você fica parado, indeciso, enquanto o vento uiva ao redor.\n")
+              escreva("\nPressione ENTER para voltar aos locais.\n")
+              leia(tecla)
+              limpa()
+              pare
+          }
+          pare
+
+        caso contrario:
+          escreva("Opção inválida. Douglas fica confuso por um momento.\n")
+          escreva("Pressione ENTER para tentar novamente.\n")
+          leia(tecla)
+          limpa()
+          pare
+      }
+    }
+  }
+}

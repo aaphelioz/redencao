@@ -1,0 +1,14 @@
+{
+  "name": "jogoredencao",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Menu principal de Redenção, um jogo de investigação noir.",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "phaser": "^4.2.1",
+    "puppeteer-core": "^25.17.0"
+  }
+}
